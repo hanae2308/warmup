@@ -1,0 +1,4556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warmup Tools Dashboard - All-in-One (7 Tools)</title>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3a56d4;
+            --primary-light: #5a72e0;
+            --primary-dark: #2a46c4;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --warning: #dc3545;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --border-radius: 8px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 0;
+            color: var(--dark);
+            line-height: 1.5;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .header-content {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .header-left h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header-left .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .tool-selector {
+            display: flex;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px;
+            border-radius: var(--border-radius);
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+
+        .tool-tab {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            flex: 1;
+            justify-content: center;
+            min-width: 120px;
+        }
+
+        .tool-tab:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .tool-tab.active {
+            background: white;
+            color: var(--primary);
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .tool-section {
+            display: none;
+        }
+
+        .tool-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ========== CORE STYLES ========== */
+        .app-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1100px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        .badge {
+            background: var(--primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: var(--transition);
+            margin-bottom: 15px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(58, 86, 212, 0.1);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(58, 86, 212, 0.1);
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #c82333;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e0e0e0;
+            color: var(--secondary);
+        }
+
+        .btn-outline:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        .teams-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+        }
+
+        .team-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .team-item:last-child {
+            border-bottom: none;
+        }
+
+        .team-item:hover {
+            background: #f8f9fa;
+        }
+
+        .team-name {
+            font-weight: 500;
+        }
+
+        .team-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .output-content {
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            min-height: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .subject-header {
+            font-weight: 600;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        .team-header {
+            margin-left: 10px;
+            font-weight: 500;
+            margin-top: 8px;
+            color: var(--dark);
+        }
+
+        .ip-item {
+            margin-left: 20px;
+            font-family: 'Consolas', monospace;
+        }
+
+        .ip-match {
+            color: var(--success);
+        }
+
+        .ip-no-match {
+            color: var(--warning);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .actions .btn {
+            flex: 1;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .filter-controls label {
+            font-weight: 500;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--secondary);
+        }
+
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #dee2e6;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 18px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--warning);
+        }
+
+        .notification.info {
+            background: var(--info);
+        }
+
+        .history-panel {
+            margin-top: 20px;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+        }
+
+        .history-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item:hover {
+            background: #f8f9fa;
+        }
+
+        .history-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .history-date {
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        .history-stats {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 20px;
+            color: var(--secondary);
+        }
+
+        .history-empty i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: #dee2e6;
+        }
+
+        /* ========== EMAIL IP COUNTER STYLES ========== */
+        .email-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .email-header {
+            background: #4a54e1;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        .email-content {
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+
+        .email-textarea {
+            width: 100%;
+            height: 250px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .email-textarea:focus {
+            outline: none;
+            border-color: #4a54e1;
+        }
+
+        .email-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .email-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #4a54e1;
+            color: white;
+        }
+
+        .email-btn:hover {
+            background: #3a44d1;
+            transform: translateY(-1px);
+        }
+
+        .clear-btn {
+            background: #6c757d;
+        }
+
+        .clear-btn:hover {
+            background: #5a6268;
+        }
+
+        .email-output {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .email-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .email-table th {
+            background: #4a54e1;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .email-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .email-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .ip-count {
+            display: inline-block;
+            background: #4a54e1;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4a54e1;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ========== EXTRACTORS STYLES ========== */
+        .extractors-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .textarea-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .textarea-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .extractor-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .extractor-buttons .btn {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .result-stats {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+
+        .result-stats span {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* ========== DATA FILTER PRO STYLES ========== */
+        .filter-app-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            min-height: 600px;
+        }
+
+        @media (max-width: 1200px) {
+            .filter-app-container {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+        }
+
+        .filter-sidebar {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .filter-logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .filter-logo h1 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .filter-logo p {
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+
+        .filter-main {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .filter-data-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1100px) {
+            .filter-data-inputs {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .textarea-container {
+            position: relative;
+        }
+
+        .textarea-label {
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            background: white;
+            padding: 0 10px;
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .filter-group {
+            margin-bottom: 20px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .select-wrapper, .input-wrapper {
+            position: relative;
+        }
+
+        .filter-select, .filter-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .filter-teams-container {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            background: white;
+        }
+
+        .filter-teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .filter-team-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-team-item:hover {
+            background: #e9ecef;
+        }
+
+        .filter-team-item.selected {
+            background: var(--primary);
+            color: white;
+        }
+
+        .filter-team-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: var(--primary);
+            color: white;
+        }
+
+        .filter-results-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-stat-item {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .filter-stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .filter-stat-label {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-top: 5px;
+        }
+
+        .filter-table-container {
+            flex: 1;
+            overflow: auto;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            background: white;
+        }
+
+        .filter-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .filter-table th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .filter-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .filter-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .filter-match-badge {
+            background: #4cc9f0;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .filter-seed-high {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .filter-seed-low {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        /* ========== LIST COMPARATOR STYLES ========== */
+        .comparator-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .comparator-card {
+            background: white;
+            border-radius: 26px;
+            box-shadow: 0 20px 35px -8px rgba(0,20,40,0.2);
+            overflow: hidden;
+            border: 1px solid #e9edf4;
+        }
+
+        .comparator-header {
+            padding: 24px 30px 8px 30px;
+        }
+
+        .comparator-header h2 {
+            font-weight: 500;
+            font-size: 1.1rem;
+            letter-spacing: 0.3px;
+            color: #1e3a5f;
+            margin-bottom: 6px;
+        }
+
+        .comparator-header h1 {
+            font-weight: 600;
+            font-size: 1.9rem;
+            color: #0b1d31;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.3px;
+        }
+
+        .input-lists {
+            display: flex;
+            gap: 20px;
+            padding: 10px 30px 20px 30px;
+            flex-wrap: wrap;
+        }
+
+        .list-box {
+            flex: 1 1 250px;
+            background: #f9fcff;
+            border-radius: 20px;
+            padding: 18px 20px 20px 20px;
+            border: 1px solid #dde5ed;
+            box-shadow: inset 0 1px 3px #00000008, 0 2px 4px #0000000c;
+        }
+
+        .list-box label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #2c5779;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .list-box label span {
+            background: #d4e0f0;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #0f3a60;
+        }
+
+        .comparator-textarea {
+            width: 100%;
+            border: 1px solid #bccfdf;
+            border-radius: 18px;
+            padding: 18px 16px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            background: white;
+            resize: vertical;
+            line-height: 1.6;
+            color: #102331;
+            box-shadow: 0 1px 3px #0000000a;
+            transition: 0.15s;
+        }
+
+        .comparator-textarea:focus {
+            outline: none;
+            border-color: #3f7cbb;
+            box-shadow: 0 0 0 3px #a6c9f0;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 6px 30px 20px 30px;
+            flex-wrap: wrap;
+        }
+
+        .results-area {
+            padding: 8px 30px 30px 30px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 16px;
+        }
+
+        .results-header h3 {
+            font-weight: 600;
+            color: #0b263b;
+            font-size: 1.3rem;
+        }
+
+        .comparison-grid {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .result-panel {
+            flex: 1 1 200px;
+            background: #f8fafd;
+            border-radius: 22px;
+            border: 1px solid #dbe4ed;
+            padding: 20px 18px;
+            box-shadow: 0 2px 6px #cddae9;
+        }
+
+        .panel-title {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-weight: 600;
+            color: #365f7e;
+            border-bottom: 2px solid #cbdae9;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 120px;
+            max-height: 260px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .item-badge {
+            background: white;
+            border-radius: 40px;
+            border: 1px solid #d2ddee;
+            padding: 8px 16px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #102b44;
+            box-shadow: 0 1px 2px #d4e0f0;
+            transition: 0.1s;
+            word-break: break-word;
+        }
+
+        .item-badge.common {
+            background: #e1f0fa;
+            border-left: 4px solid #2d7fc1;
+            font-weight: 500;
+        }
+
+        .item-badge.unique1 {
+            background: #fff0dd;
+            border-left: 4px solid #d9822b;
+        }
+
+        .item-badge.unique2 {
+            background: #f0e7fc;
+            border-left: 4px solid #8a6bb2;
+        }
+
+        .empty-placeholder {
+            color: #9fb0c6;
+            font-style: italic;
+            padding: 14px 8px;
+            font-size: 0.9rem;
+            background: #eef3f9;
+            border-radius: 40px;
+            text-align: center;
+        }
+
+        .dash-list {
+            background: #eef4fa;
+            border-radius: 16px;
+            padding: 10px 15px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #1f3b54;
+            max-height: 70px;
+            overflow-y: auto;
+            border: 1px solid #cbdae9;
+        }
+
+        .dash-list span {
+            background: white;
+            padding: 2px 10px;
+            border-radius: 30px;
+            margin: 0 4px 4px 0;
+            display: inline-block;
+            border: 1px solid #aec5dd;
+        }
+
+        /* ========== EMAIL CONTENT-TYPE FILTER STYLES ========== */
+        .content-type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .content-type-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+
+        .content-type-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .content-type-item label {
+            cursor: pointer;
+            flex: 1;
+            color: #495057;
+        }
+
+        .content-type-item .count {
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            color: #495057;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+
+        .stat-card .label {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .value {
+            color: #667eea;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .type-stats {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .type-stat-badge {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            border: 1px solid #dee2e6;
+            color: #495057;
+        }
+
+        .type-stat-badge .type-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .email-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            background: white;
+            transition: background 0.3s ease;
+        }
+
+        .email-item:hover {
+            background: #f8f9fa;
+        }
+
+        .email-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 15px;
+        }
+
+        .email-details {
+            flex: 1;
+        }
+
+        .email-name {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .email-meta {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .email-content-type {
+            background: #e9ecef;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            color: #495057;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        /* ========== ERROR PARSER STYLES ========== */
+        .error-summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .error-summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .error-summary-card .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .error-summary-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .error-type-selector {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .error-type-dropdown {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .error-type-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .error-tab {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .error-tab:hover {
+            background: #e9ecef;
+        }
+
+        .error-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .error-tab .count {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-size: 0.85em;
+        }
+
+        .error-content {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .error-stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .error-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .error-stat-item {
+            text-align: center;
+        }
+
+        .error-stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .error-stat-value {
+            color: #495057;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .ip-list {
+            padding: 20px;
+        }
+
+        .ip-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            font-family: 'Courier New', monospace;
+        }
+
+        .ip-item:last-child {
+            border-bottom: none;
+        }
+
+        .ip-address {
+            flex: 1;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .ip-teams {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .team-badge {
+            background: #e9ecef;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            color: #495057;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1>Warmup Tools Dashboard</h1>
+                <p class="subtitle">All-in-One Toolkit (7 Tools)</p>
+            </div>
+            <div class="tool-selector">
+                <button class="tool-tab active" data-tool="ipMatcher">
+                    <i class="fas fa-search"></i> IP Matcher
+                </button>
+                <button class="tool-tab" data-tool="ipCounter">
+                    <i class="fas fa-calculator"></i> IP Counter
+                </button>
+                <button class="tool-tab" data-tool="extractors">
+                    <i class="fas fa-filter"></i> Extractors
+                </button>
+                <button class="tool-tab" data-tool="dataFilter">
+                    <i class="fas fa-chart-bar"></i> Data Filter
+                </button>
+                <button class="tool-tab" data-tool="listComparator">
+                    <i class="fas fa-list"></i> List Comparator
+                </button>
+                <button class="tool-tab" data-tool="emailFilter">
+                    <i class="fas fa-envelope"></i> Email Filter
+                </button>
+                <button class="tool-tab" data-tool="errorParser">
+                    <i class="fas fa-exclamation-triangle"></i> Error Parser
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="dashboard-container">
+        <!-- Tool 1: IP Matcher (from index 9) -->
+        <div id="ipMatcherTool" class="tool-section active">
+            <div class="app-container">
+                <!-- Left Panel: Database Management -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-database"></i> Team Database</h2>
+                        <span class="badge" id="ipMatcherDbStats">0</span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="ipMatcherTeamName">Team Name</label>
+                        <input type="text" id="ipMatcherTeamName" placeholder="TEAM H">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="ipMatcherServerData">Servers & IPs</label>
+                        <textarea id="ipMatcherServerData" placeholder="server:ip"></textarea>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-block" id="ipMatcherAddTeamBtn">
+                        <i class="fas fa-plus"></i> Add Team
+                    </button>
+                    
+                    <button class="btn btn-outline btn-block" id="ipMatcherResetDatabaseBtn">
+                        <i class="fas fa-trash"></i> Reset Database
+                    </button>
+                    
+                    <div class="teams-list" id="ipMatcherTeamsList">
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <p>No teams added yet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Input & Output -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-search"></i> IP Lookup</h2>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="ipMatcherIpInput">IPs to Lookup</label>
+                        <textarea id="ipMatcherIpInput" placeholder="Paste your IP data here"></textarea>
+                    </div>
+                    
+                    <button class="btn btn-success btn-block" id="ipMatcherMatchIPsBtn">
+                        <i class="fas fa-play"></i> Match IPs
+                    </button>
+                    
+                    <div class="output-section">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fas fa-list"></i> Results</h2>
+                            <span class="badge" id="ipMatcherMatchStats">0</span>
+                        </div>
+                        
+                        <div class="filter-controls">
+                            <label for="ipMatcherTeamFilter">Filter by team:</label>
+                            <select id="ipMatcherTeamFilter">
+                                <option value="all">All Teams</option>
+                            </select>
+                        </div>
+                        
+                        <div class="output-content" id="ipMatcherOutputResults">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>Run a match to see results</p>
+                            </div>
+                        </div>
+                        
+                        <div class="actions">
+                            <button class="btn btn-outline" id="ipMatcherCopyResultsBtn">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            <button class="btn btn-outline" id="ipMatcherDownloadResultsBtn">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                            <button class="btn btn-outline" id="ipMatcherResetResultsBtn">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- History Panel -->
+                    <div class="history-panel">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fas fa-history"></i> Search History</h2>
+                            <span class="badge" id="ipMatcherHistoryStats">0</span>
+                        </div>
+                        
+                        <div class="history-list" id="ipMatcherHistoryList">
+                            <div class="history-empty">
+                                <i class="fas fa-clock"></i>
+                                <p>No search history yet</p>
+                            </div>
+                        </div>
+                        
+                        <div class="actions">
+                            <button class="btn btn-outline" id="ipMatcherClearHistoryBtn">
+                                <i class="fas fa-trash"></i> Clear History
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tool 2: IP Counter (from index 9) -->
+        <div id="ipCounterTool" class="tool-section">
+            <div class="email-container">
+                <div class="email-header">
+                    <h1>📧 Email IP Counter</h1>
+                    <p class="subtitle">Count unique IP addresses per email subject</p>
+                </div>
+
+                <div class="email-content">
+                    <div class="input-area">
+                        <textarea class="email-textarea" id="ipCounterLogInput" placeholder="Paste your email log here..."></textarea>
+                        
+                        <div class="email-controls">
+                            <button class="email-btn" id="ipCounterAnalyzeBtn">🔍 Analyze</button>
+                            <button class="email-btn clear-btn" id="ipCounterClearBtn">🗑️ Clear</button>
+                        </div>
+
+                        <div class="loading" id="ipCounterLoading">
+                            <div class="spinner"></div>
+                            <p>Processing...</p>
+                        </div>
+                    </div>
+
+                    <div class="email-output">
+                        <h2>Results</h2>
+                        <div id="ipCounterResults">
+                            <p style="color: #666; text-align: center; padding: 30px;">
+                                Results will appear here after analysis
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tool 3: Extractors (from index 9) -->
+        <div id="extractorsTool" class="tool-section">
+            <div class="extractors-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-filter"></i> Text Extractors</h2>
+                    </div>
+
+                    <div class="extractor-buttons">
+                        <button class="btn btn-outline" data-extractor="ip">
+                            <i class="fas fa-network-wired"></i> IP Extractor
+                        </button>
+                        <button class="btn btn-outline" data-extractor="domain">
+                            <i class="fas fa-globe"></i> Domain Extractor
+                        </button>
+                        <button class="btn btn-outline" data-extractor="domain-ip">
+                            <i class="fas fa-sitemap"></i> Domain-IP Extractor
+                        </button>
+                        <button class="btn btn-outline" data-extractor="ip-id">
+                            <i class="fas fa-id-card"></i> IP-ID Extractor
+                        </button>
+                    </div>
+
+                    <div class="textarea-group">
+                        <textarea id="extractorInput" placeholder="Paste your text here..."></textarea>
+                        <textarea id="extractorOutput" placeholder="Results will appear here..." readonly></textarea>
+                    </div>
+
+                    <div id="extractorResultStats" class="result-stats" style="display: none;">
+                        Found: <span id="extractorFoundCount">0</span> items
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn btn-primary" id="extractorCopyOutput">
+                            <i class="fas fa-copy"></i> Copy Output
+                        </button>
+                        <button class="btn btn-outline" id="extractorClearAll">
+                            <i class="fas fa-trash"></i> Clear All
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tool 4: Data Filter (from index 9) -->
+        <div id="dataFilterTool" class="tool-section">
+            <div class="filter-app-container">
+                <!-- SIDEBAR -->
+                <div class="filter-sidebar">
+                    <div class="filter-logo">
+                        <h1><i class="fas fa-filter"></i> Data Filter Pro</h1>
+                        <p>Filter IPs & Teams Easily</p>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <div class="filter-group">
+                            <label><i class="fas fa-eye"></i> IP Display Mode</label>
+                            <div class="select-wrapper">
+                                <select id="dataFilterIpMode" class="filter-select">
+                                    <option value="match">Show Matching IPs Only</option>
+                                    <option value="all">Show All Data</option>
+                                    <option value="exclude">Exclude Matching IPs</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label><i class="fas fa-chart-line"></i> Seeds Filter</label>
+                            <div class="select-wrapper">
+                                <select id="dataFilterSeedsFilter" class="filter-select">
+                                    <option value="all">All Seeds</option>
+                                    <option value="above">Above 500K</option>
+                                    <option value="below">Below 500K</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+                            
+                            <div id="dataFilterCustomRange" style="display: none; margin-top: 10px;">
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="number" id="dataFilterMinSeeds" placeholder="Min" class="filter-input" style="flex: 1;">
+                                    <span>to</span>
+                                    <input type="number" id="dataFilterMaxSeeds" placeholder="Max" class="filter-input" style="flex: 1;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label><i class="fas fa-sort"></i> Sort By</label>
+                            <div class="select-wrapper">
+                                <select id="dataFilterSortBy" class="filter-select">
+                                    <option value="seeds_desc">Seeds (High to Low)</option>
+                                    <option value="seeds_asc">Seeds (Low to High)</option>
+                                    <option value="team">Team</option>
+                                    <option value="ip">IP Address</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label><i class="fas fa-users"></i> Team Selection</label>
+                            <div class="filter-teams-container">
+                                <div id="dataFilterTeamsList" class="filter-teams-grid">
+                                    <!-- Teams will be added here -->
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <button class="btn btn-sm btn-outline" id="dataFilterSelectAllBtn">
+                                    <i class="fas fa-check-square"></i> Select All
+                                </button>
+                                <button class="btn btn-sm btn-outline" id="dataFilterDeselectAllBtn">
+                                    <i class="fas fa-square"></i> Deselect All
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <button class="btn btn-primary" style="width: 100%;" id="dataFilterApplyBtn">
+                                <i class="fas fa-play-circle"></i> Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- MAIN CONTENT -->
+                <div class="filter-main">
+                    <!-- DATA INPUT CARDS -->
+                    <div class="filter-data-inputs">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">
+                                    <i class="fas fa-database"></i> Your Data
+                                </h2>
+                                <button class="btn btn-sm btn-outline" id="dataFilterLoadSampleBtn">
+                                    <i class="fas fa-vial"></i> Load Sample
+                                </button>
+                            </div>
+                            <div class="textarea-container">
+                                <div class="textarea-label">Paste tab-separated data here</div>
+                                <textarea id="dataFilterDataInput" placeholder="Paste your data here..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">
+                                    <i class="fas fa-bullseye"></i> Target IPs
+                                </h2>
+                                <button class="btn btn-sm btn-outline" id="dataFilterExtractIPsBtn">
+                                    <i class="fas fa-magic"></i> Auto Extract
+                                </button>
+                            </div>
+                            <div class="textarea-container">
+                                <div class="textarea-label">Enter IPs to filter (one per line)</div>
+                                <textarea id="dataFilterTargetIPs" placeholder="Enter IP addresses to filter:"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- RESULTS CARD -->
+                    <div class="card filter-results-container">
+                        <div class="filter-results-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-chart-bar"></i> Results
+                            </h2>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-sm btn-outline" id="dataFilterCopyResultsBtn">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button class="btn btn-sm btn-outline" id="dataFilterExportCSVBtn">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- STATS -->
+                        <div class="filter-stats">
+                            <div class="filter-stat-item">
+                                <div class="filter-stat-value" id="dataFilterTotalResults">0</div>
+                                <div class="filter-stat-label">Total Records</div>
+                            </div>
+                            <div class="filter-stat-item">
+                                <div class="filter-stat-value" id="dataFilterTeamsCount">0</div>
+                                <div class="filter-stat-label">Teams</div>
+                            </div>
+                            <div class="filter-stat-item">
+                                <div class="filter-stat-value" id="dataFilterMatchingIPs">0</div>
+                                <div class="filter-stat-label">Matching IPs</div>
+                            </div>
+                            <div class="filter-stat-item">
+                                <div class="filter-stat-value" id="dataFilterAvgSeeds">0</div>
+                                <div class="filter-stat-label">Avg Seeds</div>
+                            </div>
+                        </div>
+                        
+                        <!-- RESULTS TABLE -->
+                        <div class="filter-table-container">
+                            <div class="filter-loading" id="dataFilterLoading">
+                                <div class="filter-spinner"></div>
+                                <p>Processing data...</p>
+                            </div>
+                            <table class="filter-table" id="dataFilterResultsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Team</th>
+                                        <th>IP Address</th>
+                                        <th>Server</th>
+                                        <th>Seeds</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dataFilterTableBody">
+                                    <!-- Results will appear here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tool 5: List Comparator (from comparison tool.html) -->
+        <div id="listComparatorTool" class="tool-section">
+            <div class="comparator-container">
+                <div class="comparator-card">
+                    <div class="comparator-header">
+                        <h2>🔍 INPUT LISTS</h2>
+                        <h1>List Comparator · Dual View</h1>
+                    </div>
+
+                    <!-- list input section -->
+                    <div class="input-lists">
+                        <div class="list-box">
+                            <label><span>List 1</span> original set</label>
+                            <textarea id="comparatorList1" class="comparator-textarea" rows="7">s_cmh6_5881
+s_cmh6_5884
+s_cmh6_5885
+s_cmh6_5886
+s_cmh6_5893
+s_cmh6_5894
+s_cmh6_5920</textarea>
+                        </div>
+                        <div class="list-box">
+                            <label><span>List 2</span> comparison set</label>
+                            <textarea id="comparatorList2" class="comparator-textarea" rows="4">s_cmh6_5801
+s_cmh6_5803
+s_cmh6_5849</textarea>
+                        </div>
+                    </div>
+
+                    <!-- action buttons -->
+                    <div class="action-bar">
+                        <button class="btn btn-primary" id="comparatorCompareBtn">📊 Compare Lists</button>
+                        <button class="btn btn-outline" id="comparatorClearBtn">🗑️ Clear Lists</button>
+                        <button class="btn btn-outline" id="comparatorHistoryBtn">📋 Show History</button>
+                    </div>
+
+                    <!-- COMPARISON RESULTS -->
+                    <div class="results-area" id="comparatorResultsArea">
+                        <div class="results-header">
+                            <h3>📌 Comparison Results</h3>
+                            <button class="btn btn-outline btn-sm" id="comparatorCopyBtn">📋 Copy summary</button>
+                        </div>
+
+                        <!-- Common / Unique panels -->
+                        <div class="comparison-grid">
+                            <!-- Common items -->
+                            <div class="result-panel">
+                                <div class="panel-title">✨ Common Items</div>
+                                <div class="panel-items" id="comparatorCommonPanel">
+                                    <!-- dynamic items inserted here -->
+                                </div>
+                            </div>
+                            <!-- Unique to List 1 -->
+                            <div class="result-panel">
+                                <div class="panel-title">📦 Unique to List 1</div>
+                                <div class="panel-items" id="comparatorUnique1Panel"></div>
+                            </div>
+                            <!-- Unique to List 2 -->
+                            <div class="result-panel">
+                                <div class="panel-title">🟣 Unique to List 2</div>
+                                <div class="panel-items" id="comparatorUnique2Panel"></div>
+                            </div>
+                        </div>
+
+                        <!-- mini history panel -->
+                        <div id="comparatorHistoryContainer" style="display: none;" class="dash-list">
+                            <strong>📋 last comparison:</strong> 
+                            <span id="comparatorHistoryDump"></span>
+                        </div>
+                        <div class="footer-note" style="font-size: 0.8rem; color: #7f98b3; text-align: right; margin-top: 14px; border-top: 1px dashed #c4d3e5; padding-top: 12px;">
+                            ⚡ items normalized (trim, ignore empty lines)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tool 6: Email Content-Type Filter (from email content-type filter.html) -->
+        <div id="emailFilterTool" class="tool-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-envelope"></i> Email Content-Type Filter</h2>
+                </div>
+                
+                <!-- Upload Section -->
+                <div class="upload-section" id="emailUploadSection" style="background: #f8f9fa; border-radius: 10px; padding: 30px; text-align: center; border: 2px dashed #dee2e6; cursor: pointer; transition: all 0.3s ease; margin-bottom: 20px;">
+                    <div style="font-size: 48px; color: #667eea; margin-bottom: 15px;">📂</div>
+                    <h3 style="color: #495057; margin-bottom: 10px;">Drop your email files here</h3>
+                    <p style="color: #6c757d; margin-bottom: 20px;">or click to browse</p>
+                    <input type="file" id="emailFileInput" class="file-input" style="display: none;" multiple accept=".eml,.msg,.txt">
+                    <button class="btn btn-primary" onclick="document.getElementById('emailFileInput').click()">
+                        Select Files
+                    </button>
+                </div>
+
+                <!-- Filter Section -->
+                <div id="emailFilterSection" style="display: none;">
+                    <div class="filter-group">
+                        <label>Filter by Content-Type</label>
+                        <div id="emailContentTypeFilters" class="content-type-grid"></div>
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-primary" id="emailApplyFiltersBtn">Apply Filters</button>
+                            <button class="btn btn-outline" id="emailResetFiltersBtn">Reset Filters</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Section -->
+                <div id="emailStatsSection" style="display: none;">
+                    <div class="filter-group">
+                        <label>Email Statistics</label>
+                        <div id="emailStats" class="stats-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Download Section -->
+                <div id="emailDownloadSection" style="display: none;">
+                    <div class="card-header">
+                        <h3 class="card-title">📥 Download Options</h3>
+                    </div>
+                    
+                    <!-- Type Statistics -->
+                    <div id="emailTypeStats" class="type-stats"></div>
+
+                    <!-- Download Controls -->
+                    <div class="filter-controls" style="justify-content: flex-start;">
+                        <select id="emailContentTypeSelect" class="filter-select" style="max-width: 300px;">
+                            <option value="all">All Content Types (Combined)</option>
+                        </select>
+                        <button class="btn btn-success" id="emailDownloadSelectedBtn">
+                            ⬇️ Download Selected Type
+                        </button>
+                        <button class="btn btn-primary" id="emailDownloadAllBtn">
+                            📦 Download All (Separate ZIPs)
+                        </button>
+                        <button class="btn btn-outline" id="emailDownloadSummaryBtn">
+                            📊 Download Summary Only
+                        </button>
+                    </div>
+
+                    <!-- Download Progress -->
+                    <div id="emailDownloadProgress" style="display: none; margin-top: 20px;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="emailProgressFill" style="width: 0%;"></div>
+                        </div>
+                        <p id="emailProgressText" style="text-align: center; color: #6c757d;">Preparing download...</p>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="emailResultsSection" style="display: none;">
+                    <div class="results-header">
+                        <h3 class="card-title">Filtered Emails</h3>
+                        <span id="emailCount" class="badge badge-primary"></span>
+                    </div>
+                    <div id="emailList" class="email-list"></div>
+                </div>
+
+                <!-- Loading -->
+                <div id="emailLoading" style="display: none; text-align: center; padding: 50px;">
+                    <div class="spinner"></div>
+                    <p>Processing emails...</p>
+                </div>
+
+                <!-- Messages -->
+                <div id="emailMessage" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Tool 7: Error Parser (from error type for each ip filter.html) -->
+        <div id="errorParserTool" class="tool-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-exclamation-triangle"></i> Email Error Parser</h2>
+                </div>
+                
+                <!-- Input Section -->
+                <div class="input-group">
+                    <label>📝 Paste Your Error Log</label>
+                    <textarea id="errorParserInput" rows="10" placeholder="Paste your error log here..."></textarea>
+                    
+                    <div class="actions" style="margin-top: 10px;">
+                        <button class="btn btn-primary" id="errorParserParseBtn">
+                            <i class="fas fa-search"></i> Parse Errors
+                        </button>
+                        <button class="btn btn-outline" id="errorParserClearBtn">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                        <button class="btn btn-success" id="errorParserSampleBtn">
+                            <i class="fas fa-file"></i> Load Sample
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div id="errorParserSummaryCards" class="error-summary-cards" style="display: none;"></div>
+
+                <!-- Error Type Selector -->
+                <div id="errorParserSelector" class="error-type-selector" style="display: none;">
+                    <h3>📊 Select Error Type</h3>
+                    <div class="error-type-dropdown">
+                        <select id="errorParserTypeSelect" class="filter-select">
+                            <option value="">Choose an error type...</option>
+                        </select>
+                        <button class="btn btn-primary" id="errorParserViewBtn">
+                            View Details
+                        </button>
+                        <button class="btn btn-success" id="errorParserExportCurrentBtn">
+                            📥 Export Current
+                        </button>
+                        <button class="btn btn-outline" id="errorParserExportAllBtn">
+                            📦 Export All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="errorParserResultsSection" style="display: none;">
+                    <div class="results-header">
+                        <h3 class="card-title">📋 Error Details</h3>
+                    </div>
+
+                    <!-- Error Type Tabs -->
+                    <div id="errorParserTabs" class="error-type-tabs"></div>
+
+                    <!-- Error Content -->
+                    <div id="errorParserContent" class="error-content">
+                        <div class="no-data">
+                            Select an error type to view details
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading -->
+                <div id="errorParserLoading" style="display: none; text-align: center; padding: 30px;">
+                    <div class="spinner"></div>
+                    <p>Parsing error data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- All JavaScript code -->
+    <script>
+        // ==================== NOTIFICATION SYSTEM ====================
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // ==================== DASHBOARD NAVIGATION ====================
+        document.querySelectorAll('.tool-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const toolId = this.dataset.tool;
+                
+                // Update active tab
+                document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show corresponding tool
+                document.querySelectorAll('.tool-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(toolId + 'Tool').classList.add('active');
+            });
+        });
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function isValidIP(ip) {
+            const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+            return ipRegex.test(ip);
+        }
+
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // ==================== TOOL 1: IP TEAM MATCHER (from index 9) ====================
+        (function() {
+            // Database structure
+            let teamsDatabase = [];
+            let currentResults = {};
+            let editingTeamId = null;
+            let searchHistory = [];
+            
+            // DOM Elements
+            const teamNameInput = document.getElementById('ipMatcherTeamName');
+            const serverDataInput = document.getElementById('ipMatcherServerData');
+            const addTeamBtn = document.getElementById('ipMatcherAddTeamBtn');
+            const resetDatabaseBtn = document.getElementById('ipMatcherResetDatabaseBtn');
+            const teamsList = document.getElementById('ipMatcherTeamsList');
+            const dbStats = document.getElementById('ipMatcherDbStats');
+            const ipInput = document.getElementById('ipMatcherIpInput');
+            const matchIPsBtn = document.getElementById('ipMatcherMatchIPsBtn');
+            const outputResults = document.getElementById('ipMatcherOutputResults');
+            const matchStats = document.getElementById('ipMatcherMatchStats');
+            const copyResultsBtn = document.getElementById('ipMatcherCopyResultsBtn');
+            const downloadResultsBtn = document.getElementById('ipMatcherDownloadResultsBtn');
+            const resetResultsBtn = document.getElementById('ipMatcherResetResultsBtn');
+            const teamFilter = document.getElementById('ipMatcherTeamFilter');
+            const historyList = document.getElementById('ipMatcherHistoryList');
+            const historyStats = document.getElementById('ipMatcherHistoryStats');
+            const clearHistoryBtn = document.getElementById('ipMatcherClearHistoryBtn');
+            
+            // Load teams and history from localStorage on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                loadTeamsFromStorage();
+                loadHistoryFromStorage();
+                updateTeamsList();
+                updateTeamFilter();
+                updateHistoryList();
+            });
+            
+            // Save teams to localStorage
+            function saveTeamsToStorage() {
+                localStorage.setItem('ipTeamMatcherTeams', JSON.stringify(teamsDatabase));
+            }
+            
+            // Load teams from localStorage
+            function loadTeamsFromStorage() {
+                const storedTeams = localStorage.getItem('ipTeamMatcherTeams');
+                if (storedTeams) {
+                    teamsDatabase = JSON.parse(storedTeams);
+                }
+            }
+            
+            // Save history to localStorage
+            function saveHistoryToStorage() {
+                localStorage.setItem('ipTeamMatcherHistory', JSON.stringify(searchHistory));
+            }
+            
+            // Load history from localStorage
+            function loadHistoryFromStorage() {
+                const storedHistory = localStorage.getItem('ipTeamMatcherHistory');
+                if (storedHistory) {
+                    searchHistory = JSON.parse(storedHistory);
+                }
+            }
+            
+            // Add or update team
+            addTeamBtn.addEventListener('click', function() {
+                const teamName = teamNameInput.value.trim();
+                const serverData = serverDataInput.value.trim();
+                
+                if (!teamName) {
+                    showNotification('Please enter a team name', 'error');
+                    return;
+                }
+                
+                if (!serverData) {
+                    showNotification('Please enter server data', 'error');
+                    return;
+                }
+                
+                // Parse server data
+                const servers = parseServerData(serverData);
+                
+                if (servers.length === 0) {
+                    showNotification('No valid server/IP data found', 'error');
+                    return;
+                }
+                
+                if (editingTeamId !== null) {
+                    // Update existing team
+                    const teamIndex = teamsDatabase.findIndex(team => team.id === editingTeamId);
+                    if (teamIndex !== -1) {
+                        teamsDatabase[teamIndex].name = teamName;
+                        teamsDatabase[teamIndex].servers = servers;
+                        showNotification(`Team "${teamName}" updated`, 'success');
+                    }
+                    editingTeamId = null;
+                    addTeamBtn.innerHTML = '<i class="fas fa-plus"></i> Add Team';
+                } else {
+                    // Add new team
+                    const newTeam = {
+                        id: teamsDatabase.length > 0 ? Math.max(...teamsDatabase.map(t => t.id)) + 1 : 1,
+                        name: teamName,
+                        servers: servers
+                    };
+                    teamsDatabase.push(newTeam);
+                    showNotification(`Team "${teamName}" added`, 'success');
+                }
+                
+                // Save to localStorage
+                saveTeamsToStorage();
+                
+                // Clear inputs
+                teamNameInput.value = '';
+                serverDataInput.value = '';
+                
+                updateTeamsList();
+                updateTeamFilter();
+            });
+            
+            // Parse server data from text
+            function parseServerData(serverData) {
+                const servers = [];
+                const lines = serverData.split('\n').map(line => line.trim()).filter(line => line);
+                
+                let currentServer = null;
+                
+                for (const line of lines) {
+                    if (line.includes(':')) {
+                        // Server:IP format
+                        const parts = line.split(':');
+                        if (parts.length === 2) {
+                            const serverName = parts[0].trim();
+                            const ip = parts[1].trim();
+                            
+                            // Check if this is a new server
+                            if (!currentServer || currentServer.name !== serverName) {
+                                currentServer = {
+                                    name: serverName,
+                                    ips: []
+                                };
+                                servers.push(currentServer);
+                            }
+                            
+                            if (isValidIP(ip)) {
+                                currentServer.ips.push(ip);
+                            }
+                        }
+                    } else if (isValidIP(line)) {
+                        // Just an IP (continue with current server)
+                        if (currentServer) {
+                            currentServer.ips.push(line);
+                        }
+                    }
+                }
+                
+                return servers;
+            }
+            
+            // Edit team
+            window.editTeam = function(teamId) {
+                const team = teamsDatabase.find(t => t.id === teamId);
+                if (team) {
+                    teamNameInput.value = team.name;
+                    
+                    // Convert servers back to text format
+                    let serverText = '';
+                    team.servers.forEach(server => {
+                        server.ips.forEach(ip => {
+                            serverText += `${server.name}:${ip}\n`;
+                        });
+                    });
+                    serverDataInput.value = serverText.trim();
+                    
+                    editingTeamId = teamId;
+                    addTeamBtn.innerHTML = '<i class="fas fa-save"></i> Update Team';
+                    
+                    // Scroll to input
+                    teamNameInput.focus();
+                }
+            }
+            
+            // Delete team
+            window.deleteTeam = function(teamId) {
+                if (confirm('Are you sure you want to delete this team?')) {
+                    teamsDatabase = teamsDatabase.filter(team => team.id !== teamId);
+                    // Save to localStorage
+                    saveTeamsToStorage();
+                    updateTeamsList();
+                    updateTeamFilter();
+                    showNotification('Team deleted', 'success');
+                }
+            }
+            
+            // Reset database
+            resetDatabaseBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to reset the database? All teams will be deleted.')) {
+                    teamsDatabase = [];
+                    currentResults = {};
+                    editingTeamId = null;
+                    // Clear localStorage
+                    localStorage.removeItem('ipTeamMatcherTeams');
+                    updateTeamsList();
+                    updateTeamFilter();
+                    outputResults.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>Run a match to see results</p></div>';
+                    matchStats.textContent = '0';
+                    addTeamBtn.innerHTML = '<i class="fas fa-plus"></i> Add Team';
+                    showNotification('Database reset', 'success');
+                }
+            });
+            
+            // Reset input and output
+            resetResultsBtn.addEventListener('click', function() {
+                ipInput.value = '';
+                outputResults.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>Run a match to see results</p></div>';
+                matchStats.textContent = '0';
+                teamFilter.value = 'all';
+                showNotification('Input and output cleared', 'success');
+            });
+            
+            // Update team filter dropdown
+            function updateTeamFilter() {
+                teamFilter.innerHTML = '<option value="all">All Teams</option>';
+                
+                teamsDatabase.forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team.name;
+                    option.textContent = team.name;
+                    teamFilter.appendChild(option);
+                });
+                
+                // Add event listener for filter changes
+                teamFilter.addEventListener('change', function() {
+                    displayResults(currentResults, this.value);
+                });
+            }
+            
+            // Update teams list in UI
+            function updateTeamsList() {
+                teamsList.innerHTML = '';
+                dbStats.textContent = teamsDatabase.length;
+                
+                if (teamsDatabase.length === 0) {
+                    teamsList.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>No teams added yet</p></div>';
+                    return;
+                }
+                
+                teamsDatabase.forEach(team => {
+                    const teamItem = document.createElement('div');
+                    teamItem.className = 'team-item';
+                    
+                    teamItem.innerHTML = `
+                        <div class="team-name">${team.name}</div>
+                        <div class="team-actions">
+                            <button class="btn btn-outline btn-sm" onclick="editTeam(${team.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="deleteTeam(${team.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    teamsList.appendChild(teamItem);
+                });
+            }
+            
+            // Extract subjects and group IPs
+            function extractSubjectsAndIPs(text) {
+                const lines = text.split(/\r?\n/);
+                const subjectMap = {};
+                let currentSubject = '';
+                
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed) continue;
+                    
+                    const ipMatch = trimmed.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/);
+                    
+                    if (ipMatch) {
+                        const ip = ipMatch[1];
+                        
+                        if (currentSubject) {
+                            if (!subjectMap[currentSubject]) {
+                                subjectMap[currentSubject] = new Set();
+                            }
+                            subjectMap[currentSubject].add(ip);
+                        } else {
+                            // If no subject found, use a default one
+                            const defaultSubject = 'Unknown Subject';
+                            if (!subjectMap[defaultSubject]) {
+                                subjectMap[defaultSubject] = new Set();
+                            }
+                            subjectMap[defaultSubject].add(ip);
+                        }
+                    } else {
+                        // This line might be a subject line
+                        if (trimmed && trimmed.length > 3 && !trimmed.startsWith('TEAM')) {
+                            currentSubject = trimmed;
+                        }
+                    }
+                }
+                
+                return subjectMap;
+            }
+            
+            // Match IPs against database
+            function matchIPToDatabase(ip) {
+                for (const team of teamsDatabase) {
+                    for (const server of team.servers) {
+                        if (server.ips.includes(ip)) {
+                            return {
+                                team: team.name,
+                                server: server.name,
+                                matched: true
+                            };
+                        }
+                    }
+                }
+                return {
+                    team: 'NOT FOUND',
+                    server: 'UNKNOWN',
+                    matched: false
+                };
+            }
+            
+            // Match IPs against database
+            matchIPsBtn.addEventListener('click', function() {
+                const ipData = ipInput.value.trim();
+                
+                if (!ipData) {
+                    showNotification('Please enter IPs to lookup', 'error');
+                    return;
+                }
+                
+                if (teamsDatabase.length === 0) {
+                    showNotification('No teams in database. Add teams first.', 'error');
+                    return;
+                }
+                
+                const subjectMap = extractSubjectsAndIPs(ipData);
+                
+                if (Object.keys(subjectMap).length === 0) {
+                    showNotification('No subjects or valid IPs found in input', 'error');
+                    return;
+                }
+                
+                currentResults = {};
+                let totalIPs = 0;
+                let matchedIPs = 0;
+                
+                for (const [subject, ipSet] of Object.entries(subjectMap)) {
+                    currentResults[subject] = {};
+                    const ips = Array.from(ipSet);
+                    totalIPs += ips.length;
+                    
+                    for (const ip of ips) {
+                        const match = matchIPToDatabase(ip);
+                        
+                        if (!currentResults[subject][match.team]) {
+                            currentResults[subject][match.team] = [];
+                        }
+                        
+                        currentResults[subject][match.team].push({
+                            ip: ip,
+                            server: match.server,
+                            matched: match.matched
+                        });
+                        
+                        if (match.matched) matchedIPs++;
+                    }
+                }
+                
+                // Add to search history
+                addToHistory(ipData, matchedIPs, totalIPs);
+                
+                const selectedTeam = teamFilter.value;
+                displayResults(currentResults, selectedTeam);
+                matchStats.textContent = `${matchedIPs}/${totalIPs}`;
+                showNotification(`Matched ${matchedIPs} of ${totalIPs} IPs`, 'success');
+            });
+            
+            // Add search to history
+            function addToHistory(ipData, matchedIPs, totalIPs) {
+                const now = new Date();
+                const historyEntry = {
+                    id: searchHistory.length > 0 ? Math.max(...searchHistory.map(h => h.id)) + 1 : 1,
+                    timestamp: now.getTime(),
+                    date: now.toLocaleDateString(),
+                    time: now.toLocaleTimeString(),
+                    ipData: ipData,
+                    matchedIPs: matchedIPs,
+                    totalIPs: totalIPs
+                };
+                
+                searchHistory.unshift(historyEntry);
+                
+                // Keep only the last 10 entries
+                if (searchHistory.length > 10) {
+                    searchHistory = searchHistory.slice(0, 10);
+                }
+                
+                saveHistoryToStorage();
+                updateHistoryList();
+            }
+            
+            // Load history entry
+            window.loadHistoryEntry = function(historyId) {
+                const entry = searchHistory.find(h => h.id === historyId);
+                if (entry) {
+                    ipInput.value = entry.ipData;
+                    showNotification('History entry loaded', 'success');
+                }
+            }
+            
+            // Delete history entry
+            window.deleteHistoryEntry = function(historyId) {
+                searchHistory = searchHistory.filter(h => h.id !== historyId);
+                saveHistoryToStorage();
+                updateHistoryList();
+                showNotification('History entry deleted', 'success');
+            }
+            
+            // Clear all history
+            clearHistoryBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all search history?')) {
+                    searchHistory = [];
+                    saveHistoryToStorage();
+                    updateHistoryList();
+                    showNotification('Search history cleared', 'success');
+                }
+            });
+            
+            // Update history list in UI
+            function updateHistoryList() {
+                historyList.innerHTML = '';
+                historyStats.textContent = searchHistory.length;
+                
+                if (searchHistory.length === 0) {
+                    historyList.innerHTML = '<div class="history-empty"><i class="fas fa-clock"></i><p>No search history yet</p></div>';
+                    return;
+                }
+                
+                searchHistory.forEach(entry => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    
+                    historyItem.innerHTML = `
+                        <div class="history-info">
+                            <div class="history-date">${entry.date} ${entry.time}</div>
+                            <div class="history-stats">${entry.matchedIPs}/${entry.totalIPs} IPs matched</div>
+                        </div>
+                        <div class="history-actions">
+                            <button class="btn btn-outline btn-sm" onclick="loadHistoryEntry(${entry.id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="deleteHistoryEntry(${entry.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    historyList.appendChild(historyItem);
+                });
+            }
+            
+            // Display results in organized format with filtering
+            function displayResults(results, filterTeam = 'all') {
+                if (Object.keys(results).length === 0) {
+                    outputResults.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>Run a match to see results</p></div>';
+                    return;
+                }
+                
+                let outputHTML = '';
+                let hasVisibleData = false;
+                
+                for (const [subject, teams] of Object.entries(results)) {
+                    let subjectHasData = false;
+                    let subjectHTML = '';
+                    
+                    for (const [teamName, ipData] of Object.entries(teams)) {
+                        if (filterTeam !== 'all' && teamName !== filterTeam) {
+                            continue;
+                        }
+                        
+                        if (!subjectHasData) {
+                            subjectHTML += `<div class="subject-header">${subject}</div>`;
+                            subjectHasData = true;
+                        }
+                        
+                        subjectHTML += `<div class="team-header">${teamName}</div>`;
+                        
+                        for (const data of ipData) {
+                            const ipClass = data.matched ? 'ip-match' : 'ip-no-match';
+                            const serverInfo = data.matched ? ` (${data.server})` : '';
+                            subjectHTML += `<div class="ip-item ${ipClass}">${data.ip}${serverInfo}</div>`;
+                        }
+                    }
+                    
+                    if (subjectHasData) {
+                        outputHTML += subjectHTML;
+                        hasVisibleData = true;
+                    }
+                }
+                
+                if (!hasVisibleData) {
+                    if (filterTeam === 'all') {
+                        outputHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No results to display</p></div>';
+                    } else {
+                        outputHTML = `<div class="empty-state"><i class="fas fa-search"></i><p>No results found for team "${filterTeam}"</p></div>`;
+                    }
+                }
+                
+                outputResults.innerHTML = outputHTML;
+            }
+            
+            // Copy results to clipboard
+            copyResultsBtn.addEventListener('click', function() {
+                const text = outputResults.innerText;
+                if (!text || text.includes('No results to display') || text.includes('Run a match to see results')) {
+                    showNotification('No results to copy', 'error');
+                    return;
+                }
+                
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification('Results copied to clipboard', 'success');
+                }).catch(err => {
+                    showNotification('Failed to copy results', 'error');
+                });
+            });
+            
+            // Download results
+            downloadResultsBtn.addEventListener('click', function() {
+                const text = outputResults.innerText;
+                if (!text || text.includes('No results to display') || text.includes('Run a match to see results')) {
+                    showNotification('No results to download', 'error');
+                    return;
+                }
+                
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ip-match-results.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showNotification('Results downloaded', 'success');
+            });
+        })();
+
+        // ==================== TOOL 2: EMAIL IP COUNTER (from index 9) ====================
+        (function() {
+            const analyzeBtn = document.getElementById('ipCounterAnalyzeBtn');
+            const clearBtn = document.getElementById('ipCounterClearBtn');
+            const logInput = document.getElementById('ipCounterLogInput');
+            const loading = document.getElementById('ipCounterLoading');
+            const resultsDiv = document.getElementById('ipCounterResults');
+
+            analyzeBtn.addEventListener('click', ipCounterAnalyzeLog);
+            clearBtn.addEventListener('click', ipCounterClearAll);
+
+            function ipCounterAnalyzeLog() {
+                const logText = logInput.value.trim();
+                
+                if (!logText) {
+                    showNotification('Please paste email log data first', 'error');
+                    return;
+                }
+
+                showLoading(true);
+                
+                setTimeout(() => {
+                    const results = parseLog(logText);
+                    displayResults(results);
+                    showLoading(false);
+                }, 300);
+            }
+
+            function ipCounterClearAll() {
+                logInput.value = '';
+                resultsDiv.innerHTML = 
+                    '<p style="color: #666; text-align: center; padding: 30px;">Results will appear here after analysis</p>';
+                showNotification('Cleared all content', 'info');
+            }
+
+            function showLoading(show) {
+                loading.style.display = show ? 'block' : 'none';
+            }
+
+            function parseLog(logText) {
+                const lines = logText.split('\n');
+                const subjects = {};
+                let currentSubject = null;
+
+                for (let line of lines) {
+                    line = line.trim();
+                    if (!line) continue;
+
+                    // Check if this line is a team line (starts with "team" followed by a letter/number)
+                    const isTeamLine = /^team\s+[A-Za-z0-9]+$/i.test(line);
+                    
+                    if (!isIPLine(line) && !isTeamLine && !line.includes('s_cmh6') && !line.includes('(')) {
+                        // This is a valid subject line (not an IP, not a team line, not a server line)
+                        currentSubject = line;
+                        if (!subjects[currentSubject]) {
+                            subjects[currentSubject] = new Set();
+                        }
+                    } else if (isIPLine(line)) {
+                        const ip = extractIP(line);
+                        if (ip && currentSubject) {
+                            subjects[currentSubject].add(ip);
+                        }
+                    } else if (isTeamLine) {
+                        // This is a team line - skip it (don't set as current subject)
+                        continue;
+                    }
+                }
+
+                // Convert to array for sorting
+                const results = [];
+                for (const [subject, ipSet] of Object.entries(subjects)) {
+                    // Skip empty subjects or subjects that are just team names (double-check)
+                    if (subject && !/^team\s+[A-Za-z0-9]+$/i.test(subject)) {
+                        results.push({
+                            subject,
+                            ipCount: ipSet.size,
+                            ips: Array.from(ipSet)
+                        });
+                    }
+                }
+
+                // Sort by IP count (descending)
+                results.sort((a, b) => b.ipCount - a.ipCount);
+
+                return results;
+            }
+
+            function isIPLine(line) {
+                return /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(line);
+            }
+
+            function extractIP(line) {
+                const match = line.match(/\b(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b/);
+                return match ? match[1] : null;
+            }
+
+            function displayResults(results) {
+                if (results.length === 0) {
+                    resultsDiv.innerHTML = 
+                        '<p style="color: #dc3545; text-align: center; padding: 30px;">No valid email subjects or IPs found</p>';
+                    return;
+                }
+
+                let html = `
+                    <table class="email-table">
+                        <thead>
+                            <tr>
+                                <th>Email Subject</th>
+                                <th>IP Count</th>
+                                <th>Unique IPs</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                results.forEach(item => {
+                    html += `
+                        <tr>
+                            <td>${escapeHtml(item.subject)}</td>
+                            <td><span class="ip-count">${item.ipCount}</span></td>
+                            <td><small style="color: #666;">${item.ips.join(', ')}</small></td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">
+                        Total subjects: ${results.length} | Total unique IPs: ${results.reduce((sum, item) => sum + item.ipCount, 0)}
+                    </p>
+                `;
+
+                resultsDiv.innerHTML = html;
+                showNotification(`Analyzed ${results.length} subjects`, 'success');
+            }
+
+            // Auto-analyze on paste
+            logInput.addEventListener('paste', function() {
+                setTimeout(ipCounterAnalyzeLog, 100);
+            });
+        })();
+
+        // ==================== TOOL 3: TEXT EXTRACTORS (from index 9) ====================
+        (function() {
+            // DOM Elements
+            const extractorInput = document.getElementById('extractorInput');
+            const extractorOutput = document.getElementById('extractorOutput');
+            const extractorButtons = document.querySelectorAll('[data-extractor]');
+            const copyExtractorOutputBtn = document.getElementById('extractorCopyOutput');
+            const clearExtractorBtn = document.getElementById('extractorClearAll');
+            const resultStats = document.getElementById('extractorResultStats');
+            const foundCount = document.getElementById('extractorFoundCount');
+
+            // Initialize
+            document.addEventListener('DOMContentLoaded', function() {
+                initTextExtractors();
+            });
+
+            function initTextExtractors() {
+                // Button click handlers
+                extractorButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const extractorType = this.getAttribute('data-extractor');
+                        processExtractor(extractorType);
+                    });
+                });
+
+                // Copy button
+                copyExtractorOutputBtn.addEventListener('click', function() {
+                    copyToClipboard(extractorOutput.value, 'Extractor output copied to clipboard');
+                });
+
+                // Clear button
+                clearExtractorBtn.addEventListener('click', function() {
+                    extractorInput.value = '';
+                    extractorOutput.value = '';
+                    resultStats.style.display = 'none';
+                    showNotification('Extractor cleared', 'info');
+                });
+            }
+
+            function processExtractor(type) {
+                const input = extractorInput.value.trim();
+                let output = '';
+                let count = 0;
+
+                switch(type) {
+                    case 'ip':
+                        const ipMatches = input.match(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g);
+                        output = ipMatches ? [...new Set(ipMatches)].join('\n') : '';
+                        count = ipMatches ? [...new Set(ipMatches)].length : 0;
+                        break;
+
+                    case 'domain':
+                        const domainMatches = input.match(/\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b/g);
+                        output = domainMatches ? [...new Set(domainMatches)].join('\n') : '';
+                        count = domainMatches ? [...new Set(domainMatches)].length : 0;
+                        break;
+
+                    case 'domain-ip':
+                        const result = extractDomainsAndIPs(input);
+                        output = result.output;
+                        count = result.count;
+                        break;
+
+                    case 'ip-id':
+                        const pattern = /\b(\d{1,3}(?:\.\d{1,3}){3})\s+(\d{6,})/g;
+                        const map = {};
+                        let match;
+                        let matchCount = 0;
+                        
+                        while ((match = pattern.exec(input)) !== null) {
+                            const [_, ip, id] = match;
+                            if (!map[id]) map[id] = new Set();
+                            map[id].add(ip);
+                            matchCount++;
+                        }
+                        
+                        for (const id in map) {
+                            output += id + "\n" + [...map[id]].join("\n") + "\n\n";
+                        }
+                        output = output.trim();
+                        count = Object.keys(map).length;
+                        break;
+                }
+
+                extractorOutput.value = output;
+                
+                // Update stats
+                if (count > 0) {
+                    foundCount.textContent = count;
+                    resultStats.style.display = 'block';
+                    showNotification(`Extracted ${count} items`, 'success');
+                } else {
+                    resultStats.style.display = 'none';
+                    showNotification('No items found to extract', 'warning');
+                }
+            }
+
+            // Domain-IP Extractor with proximity grouping
+            function extractDomainsAndIPs(text) {
+                if (!text.trim()) {
+                    return { output: '', count: 0 };
+                }
+
+                // IP pattern
+                const ipPattern = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
+                
+                // Domain pattern
+                const domainPattern = /\b((?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,})\b/gi;
+
+                // Get all unique IPs and domains
+                const allIPs = [...new Set(text.match(ipPattern) || [])];
+                const allDomains = [...new Set(text.match(domainPattern) || [])];
+
+                // Create domain map
+                const domainMap = {};
+                
+                // For each domain, find nearby IPs
+                allDomains.forEach(domain => {
+                    const domainRegex = new RegExp(`\\b${domain}\\b`, 'gi');
+                    let match;
+                    const domainIPs = new Set();
+                    
+                    // Search for this domain in the text
+                    while ((match = domainRegex.exec(text)) !== null) {
+                        // Look 50 characters before and after the domain
+                        const startPos = Math.max(0, match.index - 50);
+                        const endPos = Math.min(text.length, match.index + domain.length + 50);
+                        const context = text.slice(startPos, endPos);
+                        
+                        // Find IPs in this context
+                        const ipsInContext = context.match(ipPattern) || [];
+                        ipsInContext.forEach(ip => domainIPs.add(ip));
+                    }
+                    
+                    // Only include domains that have associated IPs
+                    if (domainIPs.size > 0) {
+                        domainMap[domain] = Array.from(domainIPs);
+                    }
+                });
+
+                // Find IPs that aren't associated with any domain
+                const usedIPs = Object.values(domainMap).flat();
+                const unassociatedIPs = allIPs.filter(ip => !usedIPs.includes(ip));
+
+                // Build output
+                let output = '';
+                let totalCount = 0;
+                
+                // Group by domain
+                for (const [domain, ipList] of Object.entries(domainMap)) {
+                    output += `${domain}\n`;
+                    output += `${ipList.join('\n')}\n\n`;
+                    totalCount += ipList.length + 1; // +1 for the domain itself
+                }
+
+                // Add unassociated IPs at the end
+                if (unassociatedIPs.length > 0) {
+                    if (output) output += '\n';
+                    output += `Unassociated IPs:\n${unassociatedIPs.join('\n')}\n`;
+                    totalCount += unassociatedIPs.length;
+                }
+
+                return {
+                    output: output.trim(),
+                    count: totalCount
+                };
+            }
+
+            function copyToClipboard(text, successMessage = 'Copied to clipboard') {
+                if (!text) {
+                    showNotification('Nothing to copy', 'error');
+                    return;
+                }
+                
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification(successMessage, 'success');
+                }).catch(err => {
+                    showNotification('Failed to copy', 'error');
+                });
+            }
+        })();
+
+        // ==================== TOOL 4: DATA FILTER PRO (from index 9) ====================
+        (function() {
+            // Global variables
+            let allData = [];
+            let allTeams = new Set();
+            let filteredData = [];
+            
+            // DOM Elements
+            const ipModeSelect = document.getElementById('dataFilterIpMode');
+            const seedsFilterSelect = document.getElementById('dataFilterSeedsFilter');
+            const customRangeDiv = document.getElementById('dataFilterCustomRange');
+            const sortBySelect = document.getElementById('dataFilterSortBy');
+            const teamsListDiv = document.getElementById('dataFilterTeamsList');
+            const selectAllBtn = document.getElementById('dataFilterSelectAllBtn');
+            const deselectAllBtn = document.getElementById('dataFilterDeselectAllBtn');
+            const applyBtn = document.getElementById('dataFilterApplyBtn');
+            const dataInput = document.getElementById('dataFilterDataInput');
+            const targetIPsInput = document.getElementById('dataFilterTargetIPs');
+            const loadSampleBtn = document.getElementById('dataFilterLoadSampleBtn');
+            const extractIPsBtn = document.getElementById('dataFilterExtractIPsBtn');
+            const copyResultsBtn = document.getElementById('dataFilterCopyResultsBtn');
+            const exportCSVBtn = document.getElementById('dataFilterExportCSVBtn');
+            const loadingDiv = document.getElementById('dataFilterLoading');
+            const tableBody = document.getElementById('dataFilterTableBody');
+            
+            // Initialize
+            document.addEventListener('DOMContentLoaded', function() {
+                setupEventListeners();
+                dataFilterLoadSampleData();
+            });
+            
+            function setupEventListeners() {
+                // Show/hide custom range
+                seedsFilterSelect.addEventListener('change', function() {
+                    customRangeDiv.style.display = this.value === 'custom' ? 'block' : 'none';
+                });
+                
+                // Team selection buttons
+                selectAllBtn.addEventListener('click', dataFilterSelectAllTeams);
+                deselectAllBtn.addEventListener('click', dataFilterDeselectAllTeams);
+                
+                // Action buttons
+                applyBtn.addEventListener('click', dataFilterFilterData);
+                loadSampleBtn.addEventListener('click', dataFilterLoadSampleData);
+                extractIPsBtn.addEventListener('click', dataFilterExtractIPs);
+                copyResultsBtn.addEventListener('click', dataFilterCopyResults);
+                exportCSVBtn.addEventListener('click', dataFilterExportCSV);
+                
+                // Auto-filter when data changes (with debounce)
+                let debounceTimer;
+                [dataInput, targetIPsInput].forEach(input => {
+                    input.addEventListener('input', function() {
+                        clearTimeout(debounceTimer);
+                        debounceTimer = setTimeout(() => {
+                            parseData();
+                            updateTeams();
+                            dataFilterFilterData();
+                        }, 500);
+                    });
+                });
+                
+                // Auto-filter when sidebar controls change
+                [ipModeSelect, seedsFilterSelect, sortBySelect].forEach(select => {
+                    select.addEventListener('change', dataFilterFilterData);
+                });
+            }
+            
+            function parseData() {
+                const dataText = dataInput.value;
+                const targetIPsText = targetIPsInput.value;
+                
+                const dataLines = dataText.split('\n').filter(line => line.trim() !== '');
+                const targetIPs = targetIPsText.split('\n')
+                    .map(ip => ip.trim())
+                    .filter(ip => ip !== '');
+                
+                allData = [];
+                allTeams.clear();
+                
+                dataLines.forEach((line, index) => {
+                    const parts = line.split(/\t|\s{2,}/);
+                    
+                    if (parts.length >= 8) {
+                        const ip = parts[3]?.trim() || '';
+                        const seeds = parseInt(parts[7]) || 0;
+                        const server = parts[2]?.trim() || '';
+                        const product = parts[4]?.trim() || '';
+                        
+                        // Extract team from product
+                        let team = 'Unknown';
+                        const teamMatch = product.match(/Prod Delivery\s+([A-Za-z0-9]+)\s+/i);
+                        if (teamMatch) {
+                            team = `Team ${teamMatch[1].toUpperCase()}`;
+                        }
+                        
+                        allTeams.add(team);
+                        
+                        allData.push({
+                            id: index + 1,
+                            original: line,
+                            parts: parts,
+                            ip: ip,
+                            seeds: seeds,
+                            server: server,
+                            product: product,
+                            team: team,
+                            isTarget: targetIPs.includes(ip)
+                        });
+                    }
+                });
+            }
+            
+            function updateTeams() {
+                teamsListDiv.innerHTML = '';
+                
+                Array.from(allTeams).sort().forEach(team => {
+                    const teamItem = document.createElement('div');
+                    teamItem.className = 'filter-team-item selected';
+                    teamItem.innerHTML = `
+                        <input type="checkbox" checked value="${team}">
+                        <span>${team}</span>
+                    `;
+                    teamItem.onclick = function(e) {
+                        if (e.target.type !== 'checkbox') {
+                            const checkbox = this.querySelector('input');
+                            checkbox.checked = !checkbox.checked;
+                            this.classList.toggle('selected', checkbox.checked);
+                            dataFilterFilterData();
+                        }
+                    };
+                    teamsListDiv.appendChild(teamItem);
+                });
+            }
+            
+            function dataFilterFilterData() {
+                // Show loading
+                loadingDiv.style.display = 'block';
+                
+                setTimeout(() => {
+                    parseData();
+                    
+                    let results = [...allData];
+                    
+                    // Get selected teams
+                    const selectedTeams = Array.from(document.querySelectorAll('#dataFilterTeamsList input:checked'))
+                        .map(cb => cb.value);
+                    
+                    if (selectedTeams.length > 0) {
+                        results = results.filter(item => selectedTeams.includes(item.team));
+                    }
+                    
+                    // Apply IP mode filter
+                    const ipMode = ipModeSelect.value;
+                    if (ipMode === 'match') {
+                        results = results.filter(item => item.isTarget);
+                    } else if (ipMode === 'exclude') {
+                        results = results.filter(item => !item.isTarget);
+                    }
+                    
+                    // Apply seeds filter
+                    const seedsFilter = seedsFilterSelect.value;
+                    if (seedsFilter === 'above') {
+                        results = results.filter(item => item.seeds > 500000);
+                    } else if (seedsFilter === 'below') {
+                        results = results.filter(item => item.seeds < 500000);
+                    } else if (seedsFilter === 'custom') {
+                        const min = parseInt(document.getElementById('dataFilterMinSeeds').value) || 0;
+                        const max = parseInt(document.getElementById('dataFilterMaxSeeds').value) || Infinity;
+                        results = results.filter(item => item.seeds >= min && item.seeds <= max);
+                    }
+                    
+                    // Sort results
+                    const sortBy = sortBySelect.value;
+                    results.sort((a, b) => {
+                        switch(sortBy) {
+                            case 'seeds_desc': return b.seeds - a.seeds;
+                            case 'seeds_asc': return a.seeds - b.seeds;
+                            case 'team': return a.team.localeCompare(b.team);
+                            case 'ip': return a.ip.localeCompare(b.ip);
+                            default: return 0;
+                        }
+                    });
+                    
+                    filteredData = results;
+                    displayResults(results);
+                    updateStats(results);
+                    
+                    // Hide loading
+                    loadingDiv.style.display = 'none';
+                }, 100);
+            }
+            
+            function displayResults(results) {
+                if (results.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: #6c757d;">
+                                <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                <h3>No matching records found</h3>
+                                <p>Try adjusting your filters or check your input data</p>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                results.forEach(item => {
+                    const seedClass = item.seeds > 500000 ? 'filter-seed-high' : (item.seeds < 500000 ? 'filter-seed-low' : '');
+                    const matchBadge = item.isTarget ? '<span class="filter-match-badge">MATCH</span>' : '';
+                    
+                    html += `
+                        <tr>
+                            <td><span class="filter-team-badge">${item.team}</span></td>
+                            <td><code>${item.ip}</code></td>
+                            <td>${item.server}</td>
+                            <td class="${seedClass}">${item.seeds.toLocaleString()}</td>
+                            <td>${matchBadge}</td>
+                        </tr>
+                    `;
+                });
+                
+                tableBody.innerHTML = html;
+            }
+            
+            function updateStats(results) {
+                document.getElementById('dataFilterTotalResults').textContent = results.length.toLocaleString();
+                document.getElementById('dataFilterTeamsCount').textContent = new Set(results.map(r => r.team)).size;
+                document.getElementById('dataFilterMatchingIPs').textContent = results.filter(r => r.isTarget).length.toLocaleString();
+                
+                const avgSeeds = results.length > 0 
+                    ? Math.round(results.reduce((sum, r) => sum + r.seeds, 0) / results.length)
+                    : 0;
+                document.getElementById('dataFilterAvgSeeds').textContent = avgSeeds.toLocaleString();
+            }
+            
+            function dataFilterSelectAllTeams() {
+                document.querySelectorAll('#dataFilterTeamsList input').forEach(checkbox => {
+                    checkbox.checked = true;
+                    checkbox.parentElement.classList.add('selected');
+                });
+                dataFilterFilterData();
+                showNotification('All teams selected', 'info');
+            }
+            
+            function dataFilterDeselectAllTeams() {
+                document.querySelectorAll('#dataFilterTeamsList input').forEach(checkbox => {
+                    checkbox.checked = false;
+                    checkbox.parentElement.classList.remove('selected');
+                });
+                dataFilterFilterData();
+                showNotification('All teams deselected', 'info');
+            }
+            
+            function dataFilterLoadSampleData() {
+                const sampleData = `2024-01-15	14:30:00	srv-01	192.168.1.1	Prod Delivery Team A	Product1	Category1	750000
+2024-01-15	14:35:00	srv-02	192.168.1.2	Prod Delivery Team B	Product2	Category2	250000
+2024-01-15	14:40:00	srv-03	192.168.1.3	Prod Delivery Team A	Product3	Category1	900000
+2024-01-15	14:45:00	srv-04	192.168.1.4	Prod Delivery Team C	Product4	Category3	150000
+2024-01-15	14:50:00	srv-05	192.168.1.5	Prod Delivery Team B	Product5	Category2	600000
+2024-01-15	14:55:00	srv-06	192.168.1.6	Prod Delivery Team A	Product6	Category1	300000
+2024-01-15	15:00:00	srv-07	192.168.1.7	Prod Delivery Team C	Product7	Category3	800000
+2024-01-15	15:05:00	srv-08	192.168.1.8	Prod Delivery Team B	Product8	Category2	450000
+2024-01-15	15:10:00	srv-09	192.168.1.9	Prod Delivery Team A	Product9	Category1	950000
+2024-01-15	15:15:00	srv-10	192.168.1.10	Prod Delivery Team C	Product10	Category3	100000`;
+                
+                const sampleIPs = `192.168.1.1
+192.168.1.3
+192.168.1.5
+192.168.1.7
+192.168.1.9`;
+                
+                dataInput.value = sampleData;
+                targetIPsInput.value = sampleIPs;
+                
+                parseData();
+                updateTeams();
+                dataFilterFilterData();
+                
+                showNotification('Sample data loaded successfully!', 'success');
+            }
+            
+            function dataFilterExtractIPs() {
+                if (allData.length === 0) {
+                    showNotification('No data to extract IPs from', 'warning');
+                    return;
+                }
+                
+                const uniqueIPs = [...new Set(allData.map(item => item.ip))].join('\n');
+                targetIPsInput.value = uniqueIPs;
+                dataFilterFilterData();
+                
+                showNotification(`Extracted ${allData.length} IPs`, 'success');
+            }
+            
+            function dataFilterCopyResults() {
+                if (filteredData.length === 0) {
+                    showNotification('No results to copy', 'warning');
+                    return;
+                }
+                
+                const text = filteredData.map(item => 
+                    `${item.team}\t${item.ip}\t${item.server}\t${item.seeds.toLocaleString()}\t${item.isTarget ? 'MATCH' : ''}`
+                ).join('\n');
+                
+                navigator.clipboard.writeText(text)
+                    .then(() => showNotification('Results copied to clipboard!', 'success'))
+                    .catch(() => showNotification('Failed to copy', 'error'));
+            }
+            
+            function dataFilterExportCSV() {
+                if (filteredData.length === 0) {
+                    showNotification('No results to export', 'warning');
+                    return;
+                }
+                
+                const headers = ['Team', 'IP Address', 'Server', 'Seeds', 'Status'];
+                const csvContent = [
+                    headers.join(','),
+                    ...filteredData.map(item => [
+                        `"${item.team}"`,
+                        `"${item.ip}"`,
+                        `"${item.server}"`,
+                        item.seeds,
+                        `"${item.isTarget ? 'MATCH' : ''}"`
+                    ].join(','))
+                ].join('\n');
+                
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'filtered_results.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                showNotification('CSV file downloaded!', 'success');
+            }
+        })();
+
+        // ==================== TOOL 5: LIST COMPARATOR (from comparison tool.html) ====================
+        (function() {
+            // DOM elements
+            const list1Textarea = document.getElementById('comparatorList1');
+            const list2Textarea = document.getElementById('comparatorList2');
+            const compareBtn = document.getElementById('comparatorCompareBtn');
+            const clearBtn = document.getElementById('comparatorClearBtn');
+            const historyBtn = document.getElementById('comparatorHistoryBtn');
+            const copyBtn = document.getElementById('comparatorCopyBtn');
+
+            const commonPanel = document.getElementById('comparatorCommonPanel');
+            const unique1Panel = document.getElementById('comparatorUnique1Panel');
+            const unique2Panel = document.getElementById('comparatorUnique2Panel');
+            const historyContainer = document.getElementById('comparatorHistoryContainer');
+            const historyDump = document.getElementById('comparatorHistoryDump');
+
+            // simple history memory
+            let lastCompared = { list1: [], list2: [], timestamp: null };
+
+            // helpers: parse textarea -> array of trimmed non-empty strings
+            function parseList(input) {
+                return input.split(/\n/)
+                    .map(line => line.trim())
+                    .filter(item => item.length > 0);
+            }
+
+            // remove duplicates but keep original order
+            function uniqueKeepOrder(arr) {
+                const seen = new Set();
+                return arr.filter(item => {
+                    if (seen.has(item)) return false;
+                    seen.add(item);
+                    return true;
+                });
+            }
+
+            // update UI panels with comparison
+            function renderComparison(list1Arr, list2Arr) {
+                // deduplicate each list but keep order
+                const list1 = uniqueKeepOrder(list1Arr);
+                const list2 = uniqueKeepOrder(list2Arr);
+
+                // compute sets
+                const set1 = new Set(list1);
+                const set2 = new Set(list2);
+
+                const common = list1.filter(item => set2.has(item));
+                const unique1 = list1.filter(item => !set2.has(item));
+                const unique2 = list2.filter(item => !set1.has(item));
+
+                // helper to create item divs
+                function buildItems(container, items, className, emptyMsg = null) {
+                    container.innerHTML = '';
+                    if (items.length === 0) {
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'empty-placeholder';
+                        placeholder.textContent = emptyMsg || '— none —';
+                        container.appendChild(placeholder);
+                        return;
+                    }
+
+                    for (let it of items) {
+                        const badge = document.createElement('div');
+                        badge.className = `item-badge ${className}`;
+                        badge.textContent = it;
+                        container.appendChild(badge);
+                    }
+                }
+
+                // Common panel
+                if (common.length === 0) {
+                    commonPanel.innerHTML = '<div class="empty-placeholder">✨ no common items</div>';
+                } else {
+                    buildItems(commonPanel, common, 'common');
+                }
+
+                // Unique to List 1
+                if (unique1.length === 0) {
+                    unique1Panel.innerHTML = `
+                        <div class="empty-placeholder">-</div>
+                        <div class="empty-placeholder">-</div>
+                        <div class="empty-placeholder">-</div>
+                    `;
+                } else {
+                    unique1Panel.innerHTML = '';
+                    for (let it of unique1) {
+                        const badge = document.createElement('div');
+                        badge.className = 'item-badge unique1';
+                        badge.textContent = it;
+                        unique1Panel.appendChild(badge);
+                    }
+                }
+
+                // Unique to List 2
+                if (unique2.length === 0) {
+                    unique2Panel.innerHTML = '<div class="empty-placeholder">No items found</div>';
+                } else {
+                    buildItems(unique2Panel, unique2, 'unique2');
+                }
+
+                // store last compared for history
+                lastCompared = {
+                    list1: list1,
+                    list2: list2,
+                    timestamp: new Date().toLocaleTimeString()
+                };
+            }
+
+            // initial render with default values
+            function initializeFromDefault() {
+                const defaultList1 = parseList(list1Textarea.value);
+                const defaultList2 = parseList(list2Textarea.value);
+                renderComparison(defaultList1, defaultList2);
+            }
+
+            // compare action
+            function compareHandler() {
+                const list1 = parseList(list1Textarea.value);
+                const list2 = parseList(list2Textarea.value);
+                renderComparison(list1, list2);
+            }
+
+            // clear both lists
+            function clearHandler() {
+                list1Textarea.value = '';
+                list2Textarea.value = '';
+                // reset panels to "empty" states
+                commonPanel.innerHTML = '<div class="empty-placeholder">— none —</div>';
+                unique1Panel.innerHTML = `
+                    <div class="empty-placeholder">-</div>
+                    <div class="empty-placeholder">-</div>
+                    <div class="empty-placeholder">-</div>
+                `;
+                unique2Panel.innerHTML = '<div class="empty-placeholder">No items found</div>';
+                // also clear lastCompared
+                lastCompared = { list1: [], list2: [], timestamp: null };
+                // hide history if visible
+                historyContainer.style.display = 'none';
+            }
+
+            // show history
+            function showHistoryHandler() {
+                if (!lastCompared.timestamp) {
+                    historyDump.innerHTML = '⚠️ no previous comparison';
+                } else {
+                    const l1 = lastCompared.list1.length ? lastCompared.list1.slice(0,4).join(', ') + (lastCompared.list1.length>4 ? ' …' : '') : '(empty)';
+                    const l2 = lastCompared.list2.length ? lastCompared.list2.slice(0,4).join(', ') + (lastCompared.list2.length>4 ? ' …' : '') : '(empty)';
+                    historyDump.innerHTML = `<strong>${lastCompared.timestamp}</strong> — List1: ${l1} | List2: ${l2}`;
+                }
+                historyContainer.style.display = (historyContainer.style.display === 'none') ? 'block' : 'none';
+            }
+
+            // copy summary
+            function copyResults() {
+                const commonItems = Array.from(commonPanel.querySelectorAll('.item-badge.common, .item-badge')).map(el => el.textContent.trim()).filter(t => t !== '— none —' && t !== '✨ no common items' && t !== '-');
+                const unique1Items = Array.from(unique1Panel.querySelectorAll('.item-badge.unique1, .empty-placeholder')).map(el => el.textContent.trim()).filter(t => !t.includes('No items') && t !== '-');
+                const unique2Items = Array.from(unique2Panel.querySelectorAll('.item-badge.unique2, .empty-placeholder')).map(el => el.textContent.trim()).filter(t => t !== 'No items found');
+
+                let text = '## Comparison Results\n\n';
+                text += '## Common Items\n';
+                if (commonItems.length) commonItems.forEach(i => text += `- ${i}\n`);
+                else text += '- (none)\n';
+
+                text += '\n## Unique to List 1\n';
+                if (unique1Items.length) unique1Items.forEach(i => text += `- ${i}\n`);
+                else text += '- -\n- -\n- -\n';
+
+                text += '\n## Unique to List 2\n';
+                if (unique2Items.length) unique2Items.forEach(i => text += `- ${i}\n`);
+                else text += '- No items found\n';
+
+                navigator.clipboard.writeText(text).then(() => {
+                    const oldText = copyBtn.textContent;
+                    copyBtn.textContent = '✅ Copied!';
+                    setTimeout(() => copyBtn.textContent = oldText, 1600);
+                }).catch(() => alert('Press Ctrl+C to copy'));
+            }
+
+            // wire buttons
+            compareBtn.addEventListener('click', compareHandler);
+            clearBtn.addEventListener('click', clearHandler);
+            historyBtn.addEventListener('click', showHistoryHandler);
+            copyBtn.addEventListener('click', copyResults);
+
+            // set default from the image (already prefilled)
+            window.addEventListener('DOMContentLoaded', () => {
+                initializeFromDefault();
+            });
+        })();
+
+        // ==================== TOOL 6: EMAIL CONTENT-TYPE FILTER (from email content-type filter.html) ====================
+        (function() {
+            let allEmails = [];
+            let filteredEmails = [];
+            let contentTypeStats = new Map();
+
+            // DOM Elements
+            const uploadSection = document.getElementById('emailUploadSection');
+            const fileInput = document.getElementById('emailFileInput');
+            const filterSection = document.getElementById('emailFilterSection');
+            const statsSection = document.getElementById('emailStatsSection');
+            const downloadSection = document.getElementById('emailDownloadSection');
+            const resultsSection = document.getElementById('emailResultsSection');
+            const loading = document.getElementById('emailLoading');
+            const message = document.getElementById('emailMessage');
+            const contentTypeSelect = document.getElementById('emailContentTypeSelect');
+            const typeStats = document.getElementById('emailTypeStats');
+            const emailCount = document.getElementById('emailCount');
+
+            // Drag and drop handlers
+            uploadSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadSection.classList.add('dragover');
+            });
+
+            uploadSection.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadSection.classList.remove('dragover');
+            });
+
+            uploadSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadSection.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+
+            async function handleFiles(files) {
+                if (files.length === 0) return;
+
+                showLoading();
+                hideMessage();
+                
+                allEmails = [];
+                contentTypeStats.clear();
+
+                for (let file of files) {
+                    await processEmailFile(file);
+                }
+
+                if (allEmails.length > 0) {
+                    updateFilters();
+                    updateStats();
+                    updateDownloadOptions();
+                    filteredEmails = [...allEmails];
+                    displayEmails(filteredEmails);
+                    showSections();
+                    showMessage(`Successfully processed ${allEmails.length} emails`, 'success');
+                } else {
+                    showMessage('No valid email files found', 'warning');
+                }
+
+                hideLoading();
+            }
+
+            async function processEmailFile(file) {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        const content = e.target.result;
+                        const email = parseEmail(content, file.name);
+                        
+                        if (email) {
+                            allEmails.push(email);
+                            
+                            // Update content type stats
+                            const contentType = email.contentType;
+                            contentTypeStats.set(
+                                contentType, 
+                                (contentTypeStats.get(contentType) || 0) + 1
+                            );
+                        }
+                        
+                        resolve();
+                    };
+
+                    reader.readAsText(file);
+                });
+            }
+
+            function parseEmail(content, filename) {
+                try {
+                    const lines = content.split('\n');
+                    let headers = {};
+                    let body = '';
+                    let isHeader = true;
+
+                    for (let line of lines) {
+                        if (isHeader) {
+                            if (line.trim() === '') {
+                                isHeader = false;
+                                continue;
+                            }
+                            
+                            const colonIndex = line.indexOf(':');
+                            if (colonIndex > 0) {
+                                const key = line.substring(0, colonIndex).trim().toLowerCase();
+                                const value = line.substring(colonIndex + 1).trim();
+                                headers[key] = value;
+                            }
+                        } else {
+                            body += line + '\n';
+                        }
+                    }
+
+                    let contentType = headers['content-type'] || 'text/plain';
+                    contentType = contentType.split(';')[0].trim();
+
+                    return {
+                        filename: filename,
+                        subject: headers['subject'] || 'No Subject',
+                        from: headers['from'] || 'Unknown Sender',
+                        date: headers['date'] || 'Unknown Date',
+                        contentType: contentType,
+                        size: content.length,
+                        headers: headers,
+                        body: body,
+                        raw: content
+                    };
+                } catch (error) {
+                    console.error('Error parsing email:', error);
+                    return null;
+                }
+            }
+
+            function updateFilters() {
+                const filterContainer = document.getElementById('emailContentTypeFilters');
+                filterContainer.innerHTML = '';
+
+                const sortedContentTypes = Array.from(contentTypeStats.entries())
+                    .sort((a, b) => b[1] - a[1]);
+
+                for (let [contentType, count] of sortedContentTypes) {
+                    const item = document.createElement('div');
+                    item.className = 'content-type-item';
+                    item.innerHTML = `
+                        <input type="checkbox" id="filter-${contentType}" value="${contentType}" checked>
+                        <label for="filter-${contentType}">${contentType}</label>
+                        <span class="count">${count}</span>
+                    `;
+                    filterContainer.appendChild(item);
+                }
+
+                // Add event listeners to checkboxes
+                document.querySelectorAll('#emailContentTypeFilters input[type="checkbox"]').forEach(cb => {
+                    cb.addEventListener('change', applyFilters);
+                });
+            }
+
+            function updateStats() {
+                const statsContainer = document.getElementById('emailStats');
+                statsContainer.innerHTML = '';
+
+                const totalEmails = allEmails.length;
+                const uniqueContentTypes = contentTypeStats.size;
+
+                const stats = [
+                    { label: 'Total Emails', value: totalEmails },
+                    { label: 'Unique Content-Types', value: uniqueContentTypes },
+                    { label: 'Total Size', value: formatSize(allEmails.reduce((sum, e) => sum + e.size, 0)) },
+                    { label: 'Average Size', value: formatSize(totalEmails ? allEmails.reduce((sum, e) => sum + e.size, 0) / totalEmails : 0) }
+                ];
+
+                stats.forEach(stat => {
+                    const card = document.createElement('div');
+                    card.className = 'stat-card';
+                    card.innerHTML = `
+                        <div class="label">${stat.label}</div>
+                        <div class="value">${stat.value}</div>
+                    `;
+                    statsContainer.appendChild(card);
+                });
+            }
+
+            function updateDownloadOptions() {
+                // Update dropdown
+                contentTypeSelect.innerHTML = '<option value="all">All Content Types (Combined)</option>';
+                
+                const sortedTypes = Array.from(contentTypeStats.entries())
+                    .sort((a, b) => b[1] - a[1]);
+
+                for (let [contentType, count] of sortedTypes) {
+                    const option = document.createElement('option');
+                    option.value = contentType;
+                    option.textContent = `${contentType} (${count} emails)`;
+                    contentTypeSelect.appendChild(option);
+                }
+
+                // Update type statistics badges
+                typeStats.innerHTML = '';
+                for (let [contentType, count] of sortedTypes) {
+                    const badge = document.createElement('span');
+                    badge.className = 'type-stat-badge';
+                    badge.innerHTML = `
+                        <span class="type-name">${contentType}</span>
+                        <span class="badge badge-success">${count}</span>
+                    `;
+                    typeStats.appendChild(badge);
+                }
+            }
+
+            function applyFilters() {
+                const checkboxes = document.querySelectorAll('#emailContentTypeFilters input[type="checkbox"]');
+                const selectedTypes = Array.from(checkboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value);
+
+                if (selectedTypes.length === 0) {
+                    showMessage('Please select at least one content type', 'warning');
+                    return;
+                }
+
+                filteredEmails = allEmails.filter(email => selectedTypes.includes(email.contentType));
+                displayEmails(filteredEmails);
+                updateEmailCount();
+            }
+
+            function resetFilters() {
+                const checkboxes = document.querySelectorAll('#emailContentTypeFilters input[type="checkbox"]');
+                checkboxes.forEach(cb => cb.checked = true);
+                filteredEmails = [...allEmails];
+                displayEmails(filteredEmails);
+                updateEmailCount();
+            }
+
+            function displayEmails(emails) {
+                const emailList = document.getElementById('emailList');
+                
+                if (emails.length === 0) {
+                    emailList.innerHTML = '<div class="alert alert-warning">No emails match the selected filters</div>';
+                    return;
+                }
+
+                emailList.innerHTML = '';
+                
+                emails.slice(0, 50).forEach(email => {
+                    const emailItem = document.createElement('div');
+                    emailItem.className = 'email-item';
+                    emailItem.innerHTML = `
+                        <div class="email-icon">📧</div>
+                        <div class="email-details">
+                            <div class="email-name">${escapeHtml(email.subject)}</div>
+                            <div class="email-meta">
+                                From: ${escapeHtml(email.from)} | Date: ${escapeHtml(email.date)}
+                            </div>
+                        </div>
+                        <div class="email-content-type">${escapeHtml(email.contentType)}</div>
+                    `;
+                    emailList.appendChild(emailItem);
+                });
+
+                if (emails.length > 50) {
+                    const moreItem = document.createElement('div');
+                    moreItem.className = 'email-item';
+                    moreItem.style.justifyContent = 'center';
+                    moreItem.style.background = '#f8f9fa';
+                    moreItem.innerHTML = `
+                        <div style="color: #6c757d;">
+                            ... and ${emails.length - 50} more emails (showing first 50)
+                        </div>
+                    `;
+                    emailList.appendChild(moreItem);
+                }
+            }
+
+            function updateEmailCount() {
+                emailCount.textContent = `${filteredEmails.length} emails`;
+            }
+
+            async function downloadSelectedType() {
+                const selectedValue = contentTypeSelect.value;
+                
+                if (selectedValue === 'all') {
+                    await downloadAllCombined();
+                } else {
+                    await downloadSingleType(selectedValue);
+                }
+            }
+
+            async function downloadSingleType(contentType) {
+                const typeEmails = allEmails.filter(email => email.contentType === contentType);
+                
+                if (typeEmails.length === 0) {
+                    showMessage(`No emails found with Content-Type: ${contentType}`, 'warning');
+                    return;
+                }
+
+                showDownloadProgress();
+                
+                const zip = new JSZip();
+                const folderName = contentType.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                const folder = zip.folder(folderName);
+
+                // Add emails
+                typeEmails.forEach(email => {
+                    folder.file(email.filename, email.raw);
+                });
+
+                // Add summary
+                const summary = generateTypeSummary(contentType, typeEmails);
+                folder.file('summary.txt', summary);
+
+                // Generate and download
+                const blob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+                    updateProgress(metadata.percent);
+                });
+                
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${folderName}_${typeEmails.length}_emails.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                hideDownloadProgress();
+                showMessage(`Downloaded ${typeEmails.length} emails with Content-Type: ${contentType}`, 'success');
+            }
+
+            async function downloadAllCombined() {
+                if (allEmails.length === 0) {
+                    showMessage('No emails to download', 'warning');
+                    return;
+                }
+
+                showDownloadProgress();
+
+                const zip = new JSZip();
+                const folder = zip.folder('all_emails');
+
+                // Add all emails
+                allEmails.forEach(email => {
+                    folder.file(email.filename, email.raw);
+                });
+
+                // Add summary
+                const summary = generateCompleteSummary();
+                folder.file('complete_summary.txt', summary);
+
+                // Generate and download
+                const blob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+                    updateProgress(metadata.percent);
+                });
+                
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `all_emails_${allEmails.length}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                hideDownloadProgress();
+                showMessage(`Downloaded all ${allEmails.length} emails combined`, 'success');
+            }
+
+            async function downloadAllSeparate() {
+                if (allEmails.length === 0) {
+                    showMessage('No emails to download', 'warning');
+                    return;
+                }
+
+                showDownloadProgress();
+
+                const types = new Map();
+                allEmails.forEach(email => {
+                    const type = email.contentType;
+                    if (!types.has(type)) {
+                        types.set(type, []);
+                    }
+                    types.get(type).push(email);
+                });
+
+                let completed = 0;
+                const total = types.size;
+
+                for (let [contentType, typeEmails] of types) {
+                    const zip = new JSZip();
+                    const folderName = contentType.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                    const folder = zip.folder(folderName);
+
+                    typeEmails.forEach(email => {
+                        folder.file(email.filename, email.raw);
+                    });
+
+                    const summary = generateTypeSummary(contentType, typeEmails);
+                    folder.file('summary.txt', summary);
+
+                    const blob = await zip.generateAsync({ type: 'blob' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${folderName}_${typeEmails.length}_emails.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                    completed++;
+                    updateProgress((completed / total) * 100);
+                }
+
+                hideDownloadProgress();
+                showMessage(`Downloaded ${total} separate ZIP files for each Content-Type`, 'success');
+            }
+
+            async function downloadSummary() {
+                const summary = generateCompleteSummary();
+                
+                const blob = new Blob([summary], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `email_summary_${new Date().toISOString().slice(0,10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                showMessage('Summary downloaded successfully', 'success');
+            }
+
+            function generateTypeSummary(contentType, emails) {
+                let summary = `Email Summary - Content-Type: ${contentType}\n`;
+                summary += '='.repeat(50) + '\n\n';
+                summary += `Total Emails: ${emails.length}\n`;
+                summary += `Generated: ${new Date().toLocaleString()}\n`;
+                summary += `Total Size: ${formatSize(emails.reduce((sum, e) => sum + e.size, 0))}\n\n`;
+                summary += 'Email List:\n';
+                summary += '-'.repeat(40) + '\n';
+
+                emails.forEach((email, index) => {
+                    summary += `\n${index + 1}. ${email.filename}\n`;
+                    summary += `   Subject: ${email.subject}\n`;
+                    summary += `   From: ${email.from}\n`;
+                    summary += `   Date: ${email.date}\n`;
+                    summary += `   Size: ${formatSize(email.size)}\n`;
+                });
+
+                return summary;
+            }
+
+            function generateCompleteSummary() {
+                let summary = 'COMPLETE EMAIL SUMMARY\n';
+                summary += '='.repeat(50) + '\n\n';
+                summary += `Total Emails: ${allEmails.length}\n`;
+                summary += `Generated: ${new Date().toLocaleString()}\n`;
+                summary += `Total Size: ${formatSize(allEmails.reduce((sum, e) => sum + e.size, 0))}\n\n`;
+
+                summary += 'CONTENT-TYPE DISTRIBUTION:\n';
+                summary += '-'.repeat(30) + '\n';
+                
+                const sortedTypes = Array.from(contentTypeStats.entries())
+                    .sort((a, b) => b[1] - a[1]);
+
+                for (let [contentType, count] of sortedTypes) {
+                    const percentage = ((count / allEmails.length) * 100).toFixed(1);
+                    summary += `${contentType}: ${count} emails (${percentage}%)\n`;
+                }
+
+                summary += '\n\nDETAILED EMAIL LIST BY TYPE:\n';
+                summary += '='.repeat(50) + '\n';
+
+                for (let [contentType, count] of sortedTypes) {
+                    const typeEmails = allEmails.filter(e => e.contentType === contentType);
+                    summary += `\n${contentType} (${count} emails):\n`;
+                    summary += '-'.repeat(40) + '\n';
+                    
+                    typeEmails.forEach((email, index) => {
+                        summary += `  ${index + 1}. ${email.filename}\n`;
+                        summary += `     Subject: ${email.subject}\n`;
+                        summary += `     From: ${email.from}\n`;
+                        summary += `     Date: ${email.date}\n`;
+                    });
+                }
+
+                return summary;
+            }
+
+            function showLoading() {
+                loading.style.display = 'block';
+                uploadSection.style.opacity = '0.5';
+                uploadSection.style.pointerEvents = 'none';
+            }
+
+            function hideLoading() {
+                loading.style.display = 'none';
+                uploadSection.style.opacity = '1';
+                uploadSection.style.pointerEvents = 'auto';
+            }
+
+            function showDownloadProgress() {
+                document.getElementById('emailDownloadProgress').style.display = 'block';
+                updateProgress(0);
+            }
+
+            function hideDownloadProgress() {
+                document.getElementById('emailDownloadProgress').style.display = 'none';
+            }
+
+            function updateProgress(percent) {
+                document.getElementById('emailProgressFill').style.width = `${percent}%`;
+                document.getElementById('emailProgressText').textContent = `Progress: ${Math.round(percent)}%`;
+            }
+
+            function showSections() {
+                filterSection.style.display = 'block';
+                statsSection.style.display = 'block';
+                downloadSection.style.display = 'block';
+                resultsSection.style.display = 'block';
+                updateEmailCount();
+            }
+
+            function showMessage(text, type) {
+                message.style.display = 'block';
+                message.className = `alert alert-${type}`;
+                message.textContent = text;
+                
+                setTimeout(() => {
+                    message.style.display = 'none';
+                }, 5000);
+            }
+
+            function hideMessage() {
+                message.style.display = 'none';
+            }
+
+            // Button event listeners
+            document.getElementById('emailApplyFiltersBtn').addEventListener('click', applyFilters);
+            document.getElementById('emailResetFiltersBtn').addEventListener('click', resetFilters);
+            document.getElementById('emailDownloadSelectedBtn').addEventListener('click', downloadSelectedType);
+            document.getElementById('emailDownloadAllBtn').addEventListener('click', downloadAllSeparate);
+            document.getElementById('emailDownloadSummaryBtn').addEventListener('click', downloadSummary);
+        })();
+
+        // ==================== TOOL 7: ERROR PARSER (from error type for each ip filter.html) ====================
+        (function() {
+            let parsedData = {
+                errors: new Map(),
+                teams: new Map(),
+                ipToErrors: new Map(),
+                totalIPs: 0,
+                totalErrorTypes: 0,
+                totalTeams: 0
+            };
+
+            // DOM Elements
+            const inputTextarea = document.getElementById('errorParserInput');
+            const parseBtn = document.getElementById('errorParserParseBtn');
+            const clearBtn = document.getElementById('errorParserClearBtn');
+            const sampleBtn = document.getElementById('errorParserSampleBtn');
+            const summaryCards = document.getElementById('errorParserSummaryCards');
+            const selector = document.getElementById('errorParserSelector');
+            const resultsSection = document.getElementById('errorParserResultsSection');
+            const errorTypeSelect = document.getElementById('errorParserTypeSelect');
+            const viewBtn = document.getElementById('errorParserViewBtn');
+            const exportCurrentBtn = document.getElementById('errorParserExportCurrentBtn');
+            const exportAllBtn = document.getElementById('errorParserExportAllBtn');
+            const errorTabs = document.getElementById('errorParserTabs');
+            const errorContent = document.getElementById('errorParserContent');
+            const loading = document.getElementById('errorParserLoading');
+
+            parseBtn.addEventListener('click', parseErrors);
+            clearBtn.addEventListener('click', clearInput);
+            sampleBtn.addEventListener('click', loadSample);
+            viewBtn.addEventListener('click', showSelectedError);
+            exportCurrentBtn.addEventListener('click', exportCurrentError);
+            exportAllBtn.addEventListener('click', exportAllErrors);
+
+            function parseErrors() {
+                const input = inputTextarea.value;
+                if (!input.trim()) {
+                    alert('Please paste some error log first');
+                    return;
+                }
+
+                showLoading();
+                
+                // Reset data
+                parsedData = {
+                    errors: new Map(),
+                    teams: new Map(),
+                    ipToErrors: new Map(),
+                    totalIPs: 0,
+                    totalErrorTypes: 0,
+                    totalTeams: 0
+                };
+
+                const lines = input.split('\n');
+                let currentTeam = null;
+                let currentIPs = [];
+                let currentErrorTypes = [];
+                let inErrorSection = false;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    // Skip empty lines
+                    if (!line) continue;
+                    
+                    // Detect team
+                    const teamMatch = line.match(/TEAM:\s*(\w+)/);
+                    if (teamMatch) {
+                        currentTeam = teamMatch[1];
+                        if (!parsedData.teams.has(currentTeam)) {
+                            parsedData.teams.set(currentTeam, new Map());
+                        }
+                        continue;
+                    }
+                    
+                    // Start of error section
+                    if (line.includes('❗️Errors ❗️:')) {
+                        inErrorSection = true;
+                        currentIPs = [];
+                        currentErrorTypes = [];
+                        continue;
+                    }
+                    
+                    if (inErrorSection) {
+                        // Check if line is an IP address
+                        if (isIPAddress(line)) {
+                            currentIPs.push(line);
+                            continue;
+                        }
+                        
+                        // Check if line is an error type (starts with ⚠️)
+                        if (line.startsWith('⚠️')) {
+                            const errorType = line.substring(2).trim();
+                            currentErrorTypes.push(errorType);
+                            
+                            // Initialize error type in main map if not exists
+                            if (!parsedData.errors.has(errorType)) {
+                                parsedData.errors.set(errorType, {
+                                    ips: new Set(),
+                                    teams: new Set(),
+                                    occurrences: 0
+                                });
+                            }
+                            
+                            // Add team to error type
+                            if (currentTeam) {
+                                parsedData.errors.get(errorType).teams.add(currentTeam);
+                            }
+                            
+                            // Increment occurrences
+                            parsedData.errors.get(errorType).occurrences++;
+                            
+                            // Associate all current IPs with this error type
+                            currentIPs.forEach(ip => {
+                                // Add IP to error type
+                                parsedData.errors.get(errorType).ips.add(ip);
+                                
+                                // Track which errors each IP has
+                                if (!parsedData.ipToErrors.has(ip)) {
+                                    parsedData.ipToErrors.set(ip, new Set());
+                                }
+                                parsedData.ipToErrors.get(ip).add(errorType);
+                                
+                                // Also store in team data
+                                if (currentTeam) {
+                                    const teamErrors = parsedData.teams.get(currentTeam);
+                                    if (!teamErrors.has(errorType)) {
+                                        teamErrors.set(errorType, new Set());
+                                    }
+                                    teamErrors.get(errorType).add(ip);
+                                }
+                            });
+                            
+                            continue;
+                        }
+                        
+                        // Check for end of error section
+                        if (line.includes('Total IPs:')) {
+                            inErrorSection = false;
+                            currentIPs = [];
+                            currentErrorTypes = [];
+                        }
+                    }
+                }
+
+                // Calculate totals
+                parsedData.totalIPs = parsedData.ipToErrors.size;
+                parsedData.totalErrorTypes = parsedData.errors.size;
+                parsedData.totalTeams = parsedData.teams.size;
+
+                // Update UI
+                updateSummaryCards();
+                updateErrorSelector();
+                updateErrorTabs();
+                
+                hideLoading();
+                showSections();
+                
+                // Show first error type by default
+                if (parsedData.totalErrorTypes > 0) {
+                    const firstError = Array.from(parsedData.errors.keys())[0];
+                    showErrorDetails(firstError);
+                }
+            }
+
+            function isIPAddress(str) {
+                const ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+                return ipPattern.test(str);
+            }
+
+            function updateSummaryCards() {
+                summaryCards.style.display = 'grid';
+                
+                // Calculate total occurrences
+                let totalOccurrences = 0;
+                for (let [_, errorData] of parsedData.errors) {
+                    totalOccurrences += errorData.occurrences;
+                }
+                
+                summaryCards.innerHTML = `
+                    <div class="error-summary-card">
+                        <div class="label">Error Types</div>
+                        <div class="value">${parsedData.totalErrorTypes}</div>
+                    </div>
+                    <div class="error-summary-card">
+                        <div class="label">Unique IPs</div>
+                        <div class="value">${parsedData.totalIPs}</div>
+                    </div>
+                    <div class="error-summary-card">
+                        <div class="label">Teams Affected</div>
+                        <div class="value">${parsedData.totalTeams}</div>
+                    </div>
+                    <div class="error-summary-card">
+                        <div class="label">Total Errors</div>
+                        <div class="value">${totalOccurrences}</div>
+                    </div>
+                `;
+            }
+
+            function updateErrorSelector() {
+                errorTypeSelect.innerHTML = '<option value="">Choose an error type...</option>';
+                
+                const sortedErrors = Array.from(parsedData.errors.entries())
+                    .sort((a, b) => b[1].ips.size - a[1].ips.size);
+                
+                for (let [errorType, data] of sortedErrors) {
+                    const option = document.createElement('option');
+                    option.value = errorType;
+                    option.textContent = `${errorType} (${data.ips.size} IPs, ${data.occurrences} occurrences)`;
+                    errorTypeSelect.appendChild(option);
+                }
+            }
+
+            function updateErrorTabs() {
+                errorTabs.innerHTML = '';
+                
+                const sortedErrors = Array.from(parsedData.errors.entries())
+                    .sort((a, b) => b[1].ips.size - a[1].ips.size);
+                
+                for (let [errorType, data] of sortedErrors) {
+                    const tab = document.createElement('div');
+                    tab.className = 'error-tab';
+                    tab.setAttribute('data-error', errorType);
+                    tab.innerHTML = `
+                        ${errorType.length > 25 ? errorType.substring(0, 25) + '...' : errorType}
+                        <span class="count">${data.ips.size}</span>
+                    `;
+                    tab.onclick = () => showErrorDetails(errorType);
+                    errorTabs.appendChild(tab);
+                }
+            }
+
+            function showSelectedError() {
+                const errorType = errorTypeSelect.value;
+                if (errorType) {
+                    showErrorDetails(errorType);
+                }
+            }
+
+            function showErrorDetails(errorType) {
+                const errorData = parsedData.errors.get(errorType);
+                if (!errorData) return;
+
+                // Update active tab
+                document.querySelectorAll('.error-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                    if (tab.getAttribute('data-error') === errorType) {
+                        tab.classList.add('active');
+                    }
+                });
+
+                // Update select dropdown
+                errorTypeSelect.value = errorType;
+
+                // Build IP list with team information
+                let ipListHtml = '';
+                const sortedIPs = Array.from(errorData.ips).sort();
+                
+                for (let ip of sortedIPs) {
+                    // Find which teams this IP appears in for this error type
+                    const teamsWithIP = [];
+                    for (let [team, teamErrors] of parsedData.teams) {
+                        if (teamErrors.has(errorType) && teamErrors.get(errorType).has(ip)) {
+                            teamsWithIP.push(team);
+                        }
+                    }
+                    
+                    // Get all errors for this IP
+                    const allErrorsForIP = parsedData.ipToErrors.get(ip) || new Set();
+                    const otherErrors = Array.from(allErrorsForIP)
+                        .filter(e => e !== errorType)
+                        .join(', ');
+                    
+                    ipListHtml += `
+                        <div class="ip-item">
+                            <span class="ip-address">${ip}</span>
+                            <div class="ip-teams">
+                                ${teamsWithIP.map(team => `<span class="team-badge">Team ${team}</span>`).join('')}
+                                ${otherErrors ? `<span class="team-badge" style="background: #e9ecef; color: #495057;" title="Also has: ${otherErrors}">also has other errors</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                errorContent.innerHTML = `
+                    <div class="error-stats">
+                        <div class="error-stats-grid">
+                            <div class="error-stat-item">
+                                <div class="error-stat-label">Error Type</div>
+                                <div class="error-stat-value">${errorType}</div>
+                            </div>
+                            <div class="error-stat-item">
+                                <div class="error-stat-label">Total IPs</div>
+                                <div class="error-stat-value">${errorData.ips.size}</div>
+                            </div>
+                            <div class="error-stat-item">
+                                <div class="error-stat-label">Occurrences</div>
+                                <div class="error-stat-value">${errorData.occurrences}</div>
+                            </div>
+                            <div class="error-stat-item">
+                                <div class="error-stat-label">Teams</div>
+                                <div class="error-stat-value">${errorData.teams.size}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ip-list">
+                        <div style="padding: 10px; background: #f8f9fa; border-bottom: 1px solid #dee2e6; font-weight: 600;">
+                            IP Addresses (${errorData.ips.size} total)
+                        </div>
+                        ${ipListHtml || '<div class="no-data">No IPs found for this error type</div>'}
+                    </div>
+                `;
+            }
+
+            function exportCurrentError() {
+                const errorType = errorTypeSelect.value;
+                
+                if (!errorType) {
+                    alert('Please select an error type first');
+                    return;
+                }
+
+                const errorData = parsedData.errors.get(errorType);
+                if (!errorData) return;
+
+                let content = `ERROR TYPE: ${errorType}\n`;
+                content += `=${'='.repeat(50)}\n\n`;
+                content += `Total IPs: ${errorData.ips.size}\n`;
+                content += `Occurrences: ${errorData.occurrences}\n`;
+                content += `Teams Affected: ${Array.from(errorData.teams).join(', ')}\n\n`;
+                content += `IP ADDRESSES:\n`;
+                content += `${'-'.repeat(40)}\n`;
+
+                const sortedIPs = Array.from(errorData.ips).sort();
+                sortedIPs.forEach(ip => {
+                    // Get all teams for this IP
+                    const teamsForIP = [];
+                    for (let [team, teamErrors] of parsedData.teams) {
+                        if (teamErrors.has(errorType) && teamErrors.get(errorType).has(ip)) {
+                            teamsForIP.push(team);
+                        }
+                    }
+                    content += `${ip} [Teams: ${teamsForIP.join(', ') || 'Unknown'}]\n`;
+                });
+
+                downloadFile(`${errorType.replace(/[^a-z0-9]/gi, '_')}_ips.txt`, content);
+            }
+
+            function exportAllErrors() {
+                let content = `COMPLETE ERROR ANALYSIS\n`;
+                content += `=${'='.repeat(60)}\n\n`;
+                content += `Generated: ${new Date().toLocaleString()}\n`;
+                content += `Total Error Types: ${parsedData.totalErrorTypes}\n`;
+                content += `Total Unique IPs: ${parsedData.totalIPs}\n`;
+                content += `Teams Affected: ${parsedData.totalTeams}\n\n`;
+
+                const sortedErrors = Array.from(parsedData.errors.entries())
+                    .sort((a, b) => b[1].ips.size - a[1].ips.size);
+
+                for (let [errorType, data] of sortedErrors) {
+                    content += `\n${errorType}\n`;
+                    content += `${'-'.repeat(40)}\n`;
+                    content += `IPs: ${data.ips.size} | Occurrences: ${data.occurrences} | Teams: ${Array.from(data.teams).join(', ')}\n`;
+                    content += `IP List:\n`;
+                    
+                    const sortedIPs = Array.from(data.ips).sort();
+                    sortedIPs.forEach(ip => {
+                        // Get all teams for this IP
+                        const teamsForIP = [];
+                        for (let [team, teamErrors] of parsedData.teams) {
+                            if (teamErrors.has(errorType) && teamErrors.get(errorType).has(ip)) {
+                                teamsForIP.push(team);
+                            }
+                        }
+                        content += `  ${ip} [Teams: ${teamsForIP.join(', ') || 'Unknown'}]\n`;
+                    });
+                    content += '\n';
+                }
+
+                downloadFile('all_errors_analysis.txt', content);
+            }
+
+            function downloadFile(filename, content) {
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }
+
+            function clearInput() {
+                inputTextarea.value = '';
+                summaryCards.style.display = 'none';
+                selector.style.display = 'none';
+                resultsSection.style.display = 'none';
+            }
+
+            function loadSample() {
+                const sampleData = `Message Send bot, [14/02/2026 12:39]
+TEAM: R
+    14/02 12:39:12    
+    Profile = ×CMH6_list_warmup_All_30
+    📧 Mailer 📧: Hanae HAJ M HAND
+    $ 📊 Total Out: 438209
+🟢 sl_cmh6_18: 232178 144017
+🟢 sl_cmh6_19: 136034 70126
+🟢 sl_cmh6_20: 224067 224066
+
+ ❗️Errors ❗️:
+185.9.157.45
+185.9.157.57
+185.9.157.59
+ ⚠️ Connection closed
+ ⚠️ Rate limit IP
+
+5.135.52.133
+5.135.52.141
+ ⚠️ Other
+    Total IPs: 74
+Servers: 3
+Limit: 592000
+    By Server: 197333.33
+    By IP: 8000.00`;
+
+                inputTextarea.value = sampleData;
+                parseErrors();
+            }
+
+            function showLoading() {
+                loading.style.display = 'block';
+            }
+
+            function hideLoading() {
+                loading.style.display = 'none';
+            }
+
+            function showSections() {
+                summaryCards.style.display = 'grid';
+                selector.style.display = 'block';
+                resultsSection.style.display = 'block';
+            }
+        })();
+    </script>
+</body>
+</html>
