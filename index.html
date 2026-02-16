@@ -2104,7 +2104,7 @@
         <div class="header-content">
             <div class="header-left">
                 <h1>Warmup Tools Dashboard</h1>
-                <p class="subtitle">All-in-One Toolkit (9 Tools)</p>
+                <p class="subtitle">All-in-One Toolkit</p>
             </div>
             <div class="tool-selector">
                 <button class="tool-tab active" data-tool="ipMatcher">
@@ -2123,16 +2123,16 @@
                     <i class="fas fa-list"></i> List Comp
                 </button>
                 <button class="tool-tab" data-tool="emailFilter">
-                    <i class="fas fa-envelope"></i> Email Filter
+                    <i class="fas fa-envelope"></i> Emails Filter
                 </button>
                 <button class="tool-tab" data-tool="errorParser">
-                    <i class="fas fa-exclamation-triangle"></i> Error Parser
+                    <i class="fas fa-exclamation-triangle"></i> Error/Ip
                 </button>
                 <button class="tool-tab" data-tool="ipLimitBrowser">
                     <i class="fas fa-chart-line"></i> IP Limit
                 </button>
                 <button class="tool-tab" data-tool="serverPerf">
-                    <i class="fas fa-server"></i> Server Perf
+                    <i class="fas fa-server"></i> Server Performance
                 </button>
             </div>
         </div>
@@ -2516,19 +2516,11 @@
                     <div class="input-lists">
                         <div class="list-box">
                             <label><span>List 1</span> original set</label>
-                            <textarea id="comparatorList1" class="comparator-textarea" rows="7">s_cmh6_5881
-s_cmh6_5884
-s_cmh6_5885
-s_cmh6_5886
-s_cmh6_5893
-s_cmh6_5894
-s_cmh6_5920</textarea>
+                            <textarea id="comparatorList1" class="comparator-textarea" rows="7"></textarea>
                         </div>
                         <div class="list-box">
                             <label><span>List 2</span> comparison set</label>
-                            <textarea id="comparatorList2" class="comparator-textarea" rows="4">s_cmh6_5801
-s_cmh6_5803
-s_cmh6_5849</textarea>
+                            <textarea id="comparatorList2" class="comparator-textarea" rows="4"></textarea>
                         </div>
                     </div>
 
@@ -2793,54 +2785,7 @@ s_cmh6_5849</textarea>
                 </div>
 
                 <div class="perf-input-section">
-                    <textarea id="perfInputData" class="perf-textarea">TEAM: C
-16/02 20:35:13    
-Profile = ×CMH6_list_warmup_All_30
-📧 Mailer 📧: Hanae HAJ M HAND
-$ 📊 Total Out: 114678
-💥 s_cmh6_5918: Server Down 0
-🟢 s_cmh6_5930: 10244 10244
-🟢 s_cmh6_5935: 17245 17969
-🟢 s_cmh6_5937: 10486 10486
-🟢 s_cmh6_5938: 5001 5000
-🟢 s_cmh6_5945: 15245 15245
-🟢 s_cmh6_5946: 20246 20246
-🟢 s_cmh6_5947: 20246 20246
-🟢 s_cmh6_5948: 15245 15242
-
-❗️Errors ❗️:
-5.135.213.226
-5.135.213.228
-5.135.213.225
-5.135.213.224
- ⚠️ Other
-Total IPs: 24
-Servers: 8
-Limit: 120000
-By Server: 15000.00
-By IP: 5000.00
-------
-
-TEAM: C
-16/02 18:24:17    
-Profile = ×CMH6_list_warmup_All_30
-📧 Mailer 📧: Hanae HAJ M HAND
-$ 📊 Total Out: 47010
-🟢 s_cmh6_5954: 1253 1253
-🟢 s_cmh6_5955: 5257 4216
-🟢 s_cmh6_5957: 4251 4256
-🟢 s_cmh6_5962: 29784 29784
-🟢 s_cmh6_5966: 3250 3250
-🟢 s_cmh6_5968: 4251 4251
-
-❗️Errors ❗️:
-104.206.37.68
- ⚠️ Rate limit SPF
-Total IPs: 46
-Servers: 6
-Limit: 46000
-By Server: 7666.67
-By IP: 1000.00</textarea>
+                    <textarea id="perfInputData" class="perf-textarea"></textarea>
                     <button class="btn btn-primary" onclick="perfParseData()"><i class="fas fa-play"></i> Parse Data</button>
                 </div>
 
